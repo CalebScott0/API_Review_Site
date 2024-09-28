@@ -122,11 +122,51 @@ model tip {
 model business_hours {
   business_id String   @unique
   business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  monday      String
-  tuesday     String
-  wednesday   String
-  thursday    String
-  friday      String
-  saturday    String
-  sunday      String
+  monday      String?
+  tuesday     String?
+  wednesday   String?
+  thursday    String?
+  friday      String?
+  saturday    String?
+  sunday      String?
+}
+
+// split this later into attribute categories, do this the same way as categories! (Many to Many relationship!)
+model attributes {
+  business_id                   String  @unique
+  accepts_insurance             Boolean @default(false)
+  alcohol                       String?
+  ambience                      String?
+  byob                          Boolean @default(false)
+  byob_corkage                  String?
+  best_nights                   String?
+  bike_parking                  Boolean @default(false)
+  business_accepts_bitcoin      Boolean @default(false)
+  business_accepts_credit_cards Boolean @default(false)
+  business_parking              String?
+  by_appointment_only           Boolean @default(false)
+  caters                        Boolean @default(false)
+  coat_check                    Boolean @default(false)
+  corkage                       Boolean @default(false)
+  dogs_allowed                  Boolean @default(false)
+  drive_thru                    Boolean @default(false)
+  good_for_dancing              Boolean @default(false)
+  good_for_kids                 Boolean @default(false)
+  good_for_meal                 String?
+  hair_speciality               String?
+  happy_hour                    Boolean @default(false)
+  has_tv                        Boolean @default(false)
+  music                         String?
+  noise_level                   String?
+  outdooor_seating              Boolean @default(false)
+  restaurant_attire             String?
+  restaurant_delivery           Boolean @default(false)
+  restaurant_good_for_groups    Boolean @default(false)
+  restaurant_price_range        String?
+  restaurant_reservations       Boolean @default(false)
+  restaurant_table_service      Boolean @default(false)
+  restaurant_take_out           Boolean @default(false)
+  smoking                       String?
+  wheelchair_accessible         Boolean @default(false)
+  wifi                          String?
 }
