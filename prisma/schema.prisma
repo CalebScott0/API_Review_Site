@@ -27,26 +27,60 @@ model businesses {
   latitude              Float?
   longitude             Float?
   categories_businesses categories_businesses[]
+  reviews               reviews[]
+  photos                photos[]
+  tips                  tips[]
 }
 
 model users {
-  id            String   @id @default(uuid())
-  username      String   @unique
+  id            String     @id @default(uuid())
+  username      String     @unique
   password      String
   first_name    String?
   last_name     String?
-  email         String?  @unique
+  email         String?    @unique
   // average stars from all reviews NOT ROUNDED
-  average_stars Float    @default(0.0)
-  review_count  Int      @default(0)
-  comment_count Int      @default(0)
-  user_since    DateTime @default(now())
+  average_stars Float      @default(0.0)
+  review_count  Int        @default(0)
+  comment_count Int        @default(0)
+  user_since    DateTime   @default(now())
   // useful, funny, and cool are the total of votes sent by the user to other reviews
-  useful        Int      @default(0)
-  funny         Int      @default(0)
-  cool          Int      @default(0)
+  useful        Int        @default(0)
+  funny         Int        @default(0)
+  cool          Int        @default(0)
   // fans = # of fans a user has (different than friends, fans only follow your account?)
-  fans          Int      @default(0)
+  fans          Int        @default(0)
+  reviews       reviews[]
+  comments      comments[]
+  tips          tips[]
+}
+
+model reviews {
+  id            String     @id @default(uuid())
+  author_id     String
+  author        users      @relation(fields: [author_id], references: [id])
+  business_id   String
+  business      businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  stars         Int
+  text          String
+  useful        Int        @default(0)
+  funny         Int        @default(0)
+  cool          Int        @default(0)
+  comment_count Int        @default(0)
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now())
+  comments      comments[]
+}
+
+model comments {
+  id        String   @id @default(uuid())
+  author_id String
+  author    users    @relation(fields: [author_id], references: [id])
+  review_id String
+  review    reviews  @relation(fields: [review_id], references: [id], onDelete: Cascade)
+  text      String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model categories {
@@ -65,5 +99,21 @@ model categories_businesses {
   @@unique([business_id, category_id])
 }
 
-// use snake case
-// categories_businesses
+model photos {
+  id          String     @id @default(uuid())
+  business_id String
+  business    businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  caption     String?
+  label       String?
+}
+
+model tips {
+  author_id   String
+  author      users      @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business_id String
+  business    businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  date        DateTime   @default(now())
+  text        String
+
+  @@unique([author_id, business_id])
+}

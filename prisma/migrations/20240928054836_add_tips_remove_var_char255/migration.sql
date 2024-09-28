@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "tips" ALTER COLUMN "text" SET DATA TYPE TEXT;
