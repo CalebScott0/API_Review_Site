@@ -14,22 +14,23 @@ datasource db {
 }
 
 model business {
-  id            String              @id @default(uuid())
-  name          String
+  id             String              @id @default(uuid())
+  name           String
   // average of all stars 1-5 from reviews rounded to nearest half number
-  average_stars Float               @default(0.0)
-  review_count  Int                 @default(0)
-  address       String?
-  city          String?
-  postal_code   String?
-  state         String?
-  is_open       Boolean             @default(false)
-  latitude      Float?
-  longitude     Float?
-  categories    category_business[]
-  reviews       review[]
-  photos        photo_business[]
-  tips          tip[]
+  average_stars  Float               @default(0.0)
+  review_count   Int                 @default(0)
+  address        String?
+  city           String?
+  postal_code    String?
+  state          String?
+  is_open        Boolean             @default(false)
+  latitude       Float?
+  longitude      Float?
+  categories     category_business[]
+  reviews        review[]
+  photos         photo_business[]
+  tips           tip[]
+  business_hours business_hours[]
 }
 
 model user {
@@ -116,4 +117,16 @@ model tip {
   tip_text    String
 
   @@unique([author_id, business_id])
+}
+
+model business_hours {
+  business_id String   @unique
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  monday      String
+  tuesday     String
+  wednesday   String
+  thursday    String
+  friday      String
+  saturday    String
+  sunday      String
 }
