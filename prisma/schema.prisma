@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model businesses {
+  id                    String                  @id @default(uuid())
+  name                  String
+  // average of all stars 1-5 from reviews rounded to nearest half number
+  average_stars         Float                   @default(0.0)
+  review_count          Int                     @default(0)
+  address               String?
+  city                  String?
+  postal_code           String?
+  state                 String?
+  is_open               Boolean                 @default(false)
+  latitude              Float?
+  longitude             Float?
+  categories_businesses categories_businesses[]
+}
+
+model users {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  password      String
+  first_name    String?
+  last_name     String?
+  email         String?  @unique
+  // average stars from all reviews NOT ROUNDED
+  average_stars Float    @default(0.0)
+  review_count  Int      @default(0)
+  comment_count Int      @default(0)
+  user_since    DateTime @default(now())
+  // useful, funny, and cool are the total of votes sent by the user to other reviews
+  useful        Int      @default(0)
+  funny         Int      @default(0)
+  cool          Int      @default(0)
+  // fans = # of fans a user has (different than friends, fans only follow your account?)
+  fans          Int      @default(0)
+}
+
+model categories {
+  id                    String                  @id @default(uuid())
+  name                  String                  @unique
+  categories_businesses categories_businesses[]
+}
+
+model categories_businesses {
+  category_name String
+  business_id   String
+  business      businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  category_id   String
+  category      categories @relation(fields: [category_id], references: [id], onDelete: Cascade)
+
+  @@unique([business_id, category_id])
+}
+
+// use snake case
+// categories_businesses
