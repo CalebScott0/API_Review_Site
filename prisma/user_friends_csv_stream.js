@@ -6,14 +6,13 @@ const prisma = new PrismaClient({
   log: ["info"],
 });
 
-// const records = [];
 let count = 0;
 async function processCSV() {
+  // file will not be in github as it is part of yelp academic dataset
   const parser = fs
     .createReadStream("./user_friends_exported.csv")
     .pipe(parse({ from_line: 2 }));
   for await (const record of parser) {
-    // records.push(record);
     // first index in each array is the user_id that HAS a collection of friends
     const id = record[0];
     const friends = [...record.slice(1)];
