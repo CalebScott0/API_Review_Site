@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "seed_comments": "node ./prisma/seed_comments.js",
+    "update_businesses": "node ./prisma/update_businesses.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "cbs062",
