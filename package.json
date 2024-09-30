@@ -4,6 +4,7 @@
   "description": "Backend for business review site created with Postgres, Express.js, Prisma",
   "main": "index.js",
   "scripts": {
+    "seed_comments": "node ./prisma/seed_comments.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "cbs062",

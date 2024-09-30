@@ -29,6 +29,7 @@ async function processCSV() {
 
     count++;
     if (count % 1000 === 0) {
+        // 1987897 is total user count
       console.log(((count / 1987897) * 100).toFixed(2) + "%");
     }
   }
