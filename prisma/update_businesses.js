@@ -1,34 +1,9 @@
 const { PrismaClient } = require("@prisma/client");
-
 const prisma = new PrismaClient({
   log: ["info"],
 });
-
 const roundHalf = (num) => {
   return Math.round(num * 2) / 2;
-};
-
-// total count of reviews for a business given an id
-const countBusinessReviews = (id) => {
-  return prisma.review.count({
-    where: { business_id: id },
-  });
-};
-
-// average all stars from reviews for a business given an id
-const averageBusinessStars = async (id) => {
-  // return from aggregate will look like: { _avg: { stars: 5 } }
-  // return prisma.$queryRaw`SELECT AVG(stars) FROM "Review" WHERE "business_id"=${id};`;
-  return roundHalf(
-    (
-      await prisma.review.aggregate({
-        _avg: {
-          stars: true,
-        },
-        where: { business_id: id },
-      })
-    )._avg.stars
-  );
 };
 
 (async function () {
@@ -40,21 +15,36 @@ const averageBusinessStars = async (id) => {
   console.log(
     `Updating ${businesses.length} businesses with review count and average stars...`
   );
-  // for each business, update with review count and average stars rounded to nearest 0.5
-  for (let i = 0; i < businesses.length; i++) {
-    const average_stars = averageBusinessStars(businesses[i].id);
+  // group reviews by business_id average on stars and total count
+  const business_stats = await prisma.review.groupBy({
+    by: ["business_id"],
+    _avg: {
+      stars: true, // Calculate the average stars
+    },
+    _count: {
+      stars: true, // Count the total number of reviews
+    },
+  });
+  for (let i = 0; i < business_stats.length; i++) {
+    // let average_stars = await averageBusinessStars(businesses[i].id);
 
-    const review_count = countBusinessReviews(businesses[i].id);
-
-    Promise.all([average_stars, review_count]).then((values) =>
-      prisma.business.update({
-        where: { id: businesses[i].id },
-        data: {
-          average_stars: values[0],
-          review_count: values[1],
-        },
-      })
-    );
+    // let review_count = await countBusinessReviews(businesses[i].id);
+    await prisma.business.update({
+      where: {
+        id: business_stats[i].business_id,
+      },
+      data: {
+        average_stars: roundHalf(business_stats[i]._avg.stars),
+        review_count: business_stats[i]._count.stars,
+      },
+    });
+    // await prisma.business.update({
+    //   where: { id: businesses[i].id },
+    //   data: {
+    //     average_stars,
+    //     review_count,
+    //   },
+    // });
 
     i !== 0 &&
       console.log(

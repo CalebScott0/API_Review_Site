@@ -84,8 +84,8 @@ model review {
 model comment {
   id           String   @id @default(uuid())
   comment_text String   @db.VarChar(255)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now())
   author_id    String
   author       user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
   review_id    String
