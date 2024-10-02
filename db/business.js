@@ -8,10 +8,16 @@ const getBusinessById = async (id) => {
                     WHERE business_id = ${id}`,
   ]);
   // return object with business and associated categories
-  return {
-    ...business[0],
-    categories: categories.map((x) => x.category_name),
-  };
+  //  without check, categories will always exist even if empty array
+  if (categories.length) {
+    return {
+      ...business[0],
+      categories: categories.map((x) => x.category_name),
+    };
+    // throws error in endpoint
+  } else {
+    throw new Error();
+  }
 };
 
 const getAllBusinesses = () => {
@@ -29,6 +35,14 @@ const getBusinessByCategory = ({
                         WHERE category_name = ${category_name}
                         ORDER BY average_stars DESC, review_count DESC
                         LIMIT ${limit} OFFSET ${start_index}`;
+};
+
+// from end point, db query will receive a business Id as well as an updated average_stars and/or review_count
+const updateBusiness = (id, data) => {
+  return prisma.business.update({
+    where: { id },
+    data,
+  });
 };
 
 module.exports = { getAllBusinesses, getBusinessByCategory, getBusinessById };

@@ -1,12 +1,12 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 
-const { getUserById } = require("../db/users");
+const { getUserById } = require("../db/user");
 
-(async () => {
-  console.log(await getUserById("---1lKK3aKOuomHnwAkAow"));
-})();
+const api_router = express.Router();
 
-const apiRouter = express.Router();
+api_router.use("/business", require("./business"));
 
-module.exports = apiRouter;
+api_router.use("/user", require("./user"));
+
+module.exports = api_router;
