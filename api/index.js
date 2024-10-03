@@ -1,6 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
-const { requireUser } = require("./utils");
+const { requireUser } = require("./__utils__/utils");
 const { getUserById } = require("../db/user");
 
 const api_router = express.Router();
