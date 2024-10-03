@@ -29,7 +29,6 @@ const getBusinessByCategory = ({
   start_index = 0,
   limit = 10,
 }) => {
-  console.log(category_name);
   return prisma.$queryRaw`SELECT DISTINCT b.* FROM business b
                         JOIN category_business c ON c.business_id = b.id
                         WHERE category_name = ${category_name}
@@ -45,4 +44,9 @@ const updateBusiness = (id, data) => {
   });
 };
 
-module.exports = { getAllBusinesses, getBusinessByCategory, getBusinessById };
+module.exports = {
+  getAllBusinesses,
+  getBusinessByCategory,
+  getBusinessById,
+  updateBusiness,
+};

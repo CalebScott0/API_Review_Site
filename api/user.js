@@ -1,14 +1,22 @@
 const express = require("express");
 const user_router = express.Router();
 
-const { getUserById } = require("../db/user");
+// const { getUserById } = require("../db/user");
 
-user_router.get("/user/:id", async (req, res, next) => {
-    try {
-        
-    } catch (error) {
-        
-    }
-});
+// GET /api/user/:id
+// user_router.get("/:id", async (req, res, next) => {
+//   try {
+//     const user = (await getUserById(req.params.id))[0];
+//     // remove password before sending response
+//     delete user.password;
+
+//     res.send({ user });
+//   } catch (error) {
+//     next({
+//       name: "UserNotFound",
+//       message: "Unable to find User, check id is valid",
+//     });
+//   }
+// });
 
 module.exports = user_router;

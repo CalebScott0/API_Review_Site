@@ -15,7 +15,7 @@ business_router.get("/:id", async (req, res, next) => {
   } catch (error) {
     next({
       name: "BusinessNotFound",
-      message: "Unable to find business, check id is valid",
+      message: "Unable to find Business, check id is valid",
     });
   }
 });

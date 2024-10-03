@@ -21,8 +21,18 @@ const getUserByUsername = (username) => {
 };
 const getUserByEmail = (email) => {
   return prisma.user.findUnique({
-    where: { email },
+    where: { email },ƒ
   });
 };
 
-module.exports = { createUser, getUserByEmail, getUserById, getUserByUsername };
+const updateUser = (id, user_data) => {
+  return prisma.user.update({ where: { id }, data });
+};
+
+module.exports = {
+  createUser,
+  getUserByEmail,
+  getUserById,
+  getUserByUsername,
+  updateUser,
+};
