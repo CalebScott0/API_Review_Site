@@ -230,8 +230,10 @@ review_router.delete(
       res.sendStatus(204);
 
       // UPDATE ALL USERS WHO HAD COMMENTS FOR DELETED REVIEW
-      // DECREMENT FUNCTION - make a new one with updateMany for
-      // ids in: [...]? !
+      // DECREMENT FUNCTION - DONT USE UPDATE MANY
+      // because user could have multiple comments
+      // or make the decrement function take 
+      // a variable for the decrement!
       // get all user ids by returning them with a sql db query
       // for author_id from comments with given revew_id
     } catch (error) {
