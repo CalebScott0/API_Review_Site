@@ -5,7 +5,7 @@ const createReview = (data) => {
 };
 
 // will take a review id and a data object
-const editReview = (id, data) => {
+const updateReview = (id, data) => {
   {
     return prisma.review.update({
       where: { id },
@@ -15,6 +15,27 @@ const editReview = (id, data) => {
       },
     });
   }
+};
+
+const incrementReviewCommentCount = (id) => {
+  return prisma.review.update({
+    where: { id },
+    data: {
+      comment_count: {
+        increment: 1,
+      },
+    },
+  });
+};
+const decrementReviewCommentCount = (id) => {
+  return prisma.review.update({
+    where: { id },
+    data: {
+      comment_count: {
+        decrement: 1,
+      },
+    },
+  });
 };
 
 const deleteReview = (id) => {
@@ -36,8 +57,10 @@ const getUserReviewByBusiness = (author_id, business_id) => {
 
 module.exports = {
   createReview,
+  decrementReviewCommentCount,
   deleteReview,
-  editReview,
   getReviewById,
   getUserReviewByBusiness,
+  incrementReviewCommentCount,
+  updateReview,
 };

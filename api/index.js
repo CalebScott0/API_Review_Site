@@ -53,4 +53,7 @@ api_router.use("/auth", require("./auth/auth"));
 // /api/review
 api_router.use("/review", requireUser, require("./review"));
 
+// /api/comment
+api_router.use("/comment", requireUser, require("./comment"));
+
 module.exports = api_router;

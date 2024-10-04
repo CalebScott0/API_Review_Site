@@ -1,9 +1,9 @@
 const express = require("express");
 const {
   createReview,
-  editReview,
   deleteReview,
   getReviewById,
+  updateReview,
 } = require("../db/review");
 const {
   checkCreateReviewData,
@@ -154,7 +154,7 @@ review_router.put(
             updateUser(author_id, {
               average_stars: new_user_average_stars,
             }),
-            editReview(review_id, {
+            updateReview(review_id, {
               ...req.body,
             }),
           ]);
@@ -162,7 +162,7 @@ review_router.put(
         res.send({ updated_review });
       } else {
         // If no stars in review
-        const updated_review = await editReview(review_id, {
+        const updated_review = await updateReview(review_id, {
           ...req.body,
         });
 
@@ -170,8 +170,8 @@ review_router.put(
       }
     } catch (error) {
       next({
-        name: "EditReviewFailed",
-        message: "Unable to edit review",
+        name: "UpdateReviewFailed",
+        message: "Unable to update review",
       });
     }
   }
@@ -228,6 +228,10 @@ review_router.delete(
       ]);
 
       res.sendStatus(204);
+
+      // UPDATE ALL USERS WHO HAD COMMENTS FOR DELETED REVIEW
+      // DECREMENT FUNCTION - make a new one with updateMany for 
+      // ids in: [...]? !
     } catch (error) {
       next({
         name: "DeleteReviewFailed",

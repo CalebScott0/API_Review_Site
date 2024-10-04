@@ -20,7 +20,7 @@ const getUserByUsername = (username) => {
 };
 const getUserByEmail = (email) => {
   return prisma.$queryRaw`SELECT * FROM "user"
-                        WHERE email = ${email}`;
+                        WHERE id = ${id}`;
 };
 
 const updateUser = (id, data) => {
@@ -30,8 +30,31 @@ const updateUser = (id, data) => {
   });
 };
 
+const incrementUserCommentCount = (id) => {
+  return prisma.user.update({
+    where: { id },
+    data: {
+      comment_count: {
+        increment: 1,
+      },
+    },
+  });
+};
+const decrementUserCommentCount = (id) => {
+  return prisma.user.update({
+    where: { id },
+    data: {
+      comment_count: {
+        decrement: 1,
+      },
+    },
+  });
+};
+
 module.exports = {
   createUser,
+  decrementUserCommentCount,
+  incrementUserCommentCount,
   getUserByEmail,
   getUserById,
   getUserByUsername,
