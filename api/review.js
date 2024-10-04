@@ -192,7 +192,29 @@ review_router.delete(
         stars,
         new_business_review_count
       );
-      res.send({ new_business_average_stars });
+
+      const new_user_review_count = user.review_count - 1;
+      const new_user_average_stars = averageUserStars(
+        user.average_stars,
+        user.review_count,
+        stars,
+        new_user_review_count
+      );
+
+      // DELETE ASSIGNMENT TO VARIABLE AFTER TESTING IT WORKS
+      await Promise.all([
+        updateBusiness(business_id, {
+          review_count: new_business_review_count,
+          average_stars: new_business_average_stars,
+        }),
+        updateUser(author_id, {
+          review_count: new_user_review_count,
+          average_stars: new_user_average_stars,
+        }),
+        deleteReview(review_id),
+      ]);
+
+      res.sendStatus(204);
     } catch (error) {
       next({
         name: "DeleteReviewFailed",

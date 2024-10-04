@@ -4,12 +4,15 @@ const averageBusinessStars = (
   stars_to_add,
   denominator_review_count
 ) => {
-  return (
-    Math.round(
-      ((average_stars * review_count + stars_to_add) /
-        denominator_review_count) *
-        2
-    ) / 2
+  // if number to divide by (updated review count) is 0
+  if (denominator_review_count === 0) return 0;
+
+  // parseback to float as toFixed returns string
+  return parseFloat(
+    (
+      (average_stars * review_count + stars_to_add) /
+      denominator_review_count
+    ).toFixed(2)
   );
 };
 
@@ -19,6 +22,9 @@ const averageUserStars = (
   stars_to_add,
   denominator_review_count
 ) => {
+  if (denominator_review_count === 0) return 0;
+
+  // parseback to float as toFixed returns string
   return parseFloat(
     (
       (average_stars * review_count + stars_to_add) /

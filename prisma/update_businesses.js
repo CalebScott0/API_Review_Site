@@ -34,7 +34,7 @@ const roundHalf = (num) => {
         id: business_stats[i].business_id,
       },
       data: {
-        average_stars: roundHalf(business_stats[i]._avg.stars),
+        average_stars: +business_stats[i]._avg.stars.toFixed(2),
         review_count: business_stats[i]._count.stars,
       },
     });

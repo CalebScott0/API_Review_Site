@@ -13,10 +13,12 @@ const checkUserData = (req, res, next) => {
 
 const checkUserExists = async (req, res, next) => {
   // check if a user with username from request already exists
-  const username_exists = await getUserByUsername(req.body.username);
+  const username_exists = (await getUserByUsername(req.body.username))[0];
 
   //   if user registers with an email, check if an account already exists with request email
-  const email_exists = req.body.email && (await getUserByEmail(req.body.email));
+  const email_exists =
+    req.body.email && (await getUserByEmail(req.body.email))[0];
+  console.log(email_exists);
 
   if (username_exists) {
     return res.status(409).send({

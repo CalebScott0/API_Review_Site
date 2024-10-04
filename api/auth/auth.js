@@ -41,7 +41,7 @@ auth_router.post("/login", checkUserData, async (req, res, next) => {
     const { username, password } = req.body;
 
     // find user by username
-    const user = await getUserByUsername(username);
+    const user = (await getUserByUsername(username))[0];
     // check if user exists
     if (!user) {
       return res.status(401).send({ message: "Account does not exist" });
