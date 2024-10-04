@@ -1,7 +1,13 @@
 const express = require("express");
-const { createReview, editReview, deleteReview } = require("../db/review");
+const {
+  createReview,
+  editReview,
+  deleteReview,
+  getReviewById,
+} = require("../db/review");
 const { checkCreateReviewData } = require("./__utils__/review_utils");
 const { getBusinessById, updateBusiness } = require("../db/business");
+const { averageBusinessStars, averageUserStars } = require("../db/utils");
 const { getUserById, updateUser } = require("../db/user");
 
 const review_router = express.Router();
@@ -32,12 +38,12 @@ review_router.post(
        * add stars given to new review and divide by the new total review count
        * round to nearest half
        */
-      const new_business_average_stars =
-        Math.round(
-          ((business.average_stars * business.review_count + stars) /
-            new_business_review_count) *
-            2
-        ) / 2;
+      const new_business_average_stars = averageBusinessStars(
+        business.average_stars,
+        business.review_count,
+        stars,
+        new_business_review_count
+      );
 
       // add 1 to user review count
       const new_user_review_count = user.review_count + 1;
@@ -46,14 +52,12 @@ review_router.post(
        * add stars given to new review and divide by the new total review count
        *  NOT ROUNDED TO NEAREST HALF
        */
-      const new_user_average_stars =
-        // parseback to float as toFixed returns string
-        parseFloat(
-          (
-            (user.average_stars * user.review_count + stars) /
-            new_user_review_count
-          ).toFixed(2)
-        );
+      const new_user_average_stars = averageUserStars(
+        user.average_stars,
+        user.review_count,
+        stars,
+        new_user_review_count
+      );
 
       /*
        * promise all will either resolve all or fail
@@ -88,16 +92,114 @@ review_router.post(
   }
 );
 
-// Include business Id in udpate review endpoint url to not have to do another fetch from db
-// PATCH api/review/:review_id/business/:business_id
-review_router.patch(
-  "/review/:review_id/business/:business_id",
+// Include business Id in udpate/delete review endpoint url to not have to do another fetch from db
+// PUT api/review/:review_id/business/:business_id
+review_router.put(
+  "/:review_id/business/:business_id",
   async (req, res, next) => {
-    const { business_id, review_id } = req.params;
-    console.log("business_id", business_id);
-    console.log("review_id", review_id);
+    try {
+      const { business_id, review_id } = req.params;
+      const author_id = req.user.id;
+      let { stars } = req.body;
+
+      // only update business and user if a new star rating is given
+      if (stars) {
+        let [business, user, review] = await Promise.all([
+          getBusinessById(business_id),
+          getUserById(author_id),
+          getReviewById(review_id),
+        ]);
+        user = user[0];
+        review = review[0];
+
+        // stars to reaverage should equal new star rating - original rating
+        // example: if original review had 5 stars
+        //          and new review has 4
+        //           you would modify the total stars by - 1
+        // this keeps the same equation below with adding stars
+        stars -= review.stars;
+
+        // re average business stars with new rating
+        const new_business_average_stars = averageBusinessStars(
+          business.average_stars,
+          business.review_count,
+          stars,
+          business.review_count
+        );
+
+        // re average user stars with new rating
+        const new_user_average_stars = averageUserStars(
+          user.average_stars,
+          user.review_count,
+          stars,
+          user.review_count
+        );
+
+        const [updated_business, updated_user, updated_review] =
+          await Promise.all([
+            updateBusiness(business_id, {
+              average_stars: new_business_average_stars,
+            }),
+            updateUser(author_id, {
+              average_stars: new_user_average_stars,
+            }),
+            editReview(review_id, {
+              ...req.body,
+            }),
+          ]);
+
+        res.send({ updated_review });
+      } else {
+        // If no stars in review
+        const updated_review = await editReview(review_id, {
+          ...req.body,
+        });
+
+        res.send({ updated_review });
+      }
+    } catch (error) {
+      next({
+        name: "EditReviewFailed",
+        message: "Unable to edit review",
+      });
+    }
   }
 );
-// same with delete?
+
+// DELETE /api/review/:review_id/business/:business_id
+review_router.delete(
+  "/:review_id/business/:business_id",
+  async (req, res, next) => {
+    try {
+      const { business_id, review_id } = req.params;
+      const author_id = req.user.id;
+
+      let [business, user, review] = await Promise.all([
+        getBusinessById(business_id),
+        getUserById(author_id),
+        getReviewById(review_id),
+      ]);
+      user = user[0];
+      review = review[0];
+
+      const new_business_review_count = business.review_count - 1;
+      // stars is negative as we are deleting
+      const stars = -review.stars;
+
+      const new_business_average_stars = averageBusinessStars(
+        business.average_stars,
+        business.review_count,
+        stars,
+        new_business_review_count
+      );
+      res.send({ new_business_average_stars });
+    } catch (error) {
+      next({
+        name: "DeleteReviewFailed",
+        message: "Unable to delete review",
+      });
+    }
+  }
+);
 
 module.exports = review_router;

@@ -23,8 +23,14 @@ const deleteReview = (id) => {
   });
 };
 
+const getReviewById = (id) => {
+  return prisma.$queryRaw`SELECT * FROM review
+                          WHERE id = ${id}`;
+};
+
 module.exports = {
   createReview,
   deleteReview,
   editReview,
+  getReviewById,
 };

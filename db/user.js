@@ -15,15 +15,12 @@ const getUserById = (id) => {
 };
 
 const getUserByUsername = (username) => {
-  return prisma.user.findUnique({
-    where: { username },
-  });
+  return prisma.$queryRaw`SELECT * FROM "user"
+                        WHERE username = ${username}`;
 };
 const getUserByEmail = (email) => {
-  return prisma.user.findUnique({
-    where: { email },
-    ƒ,
-  });
+  return prisma.$queryRaw`SELECT * FROM "user"
+                        WHERE email = ${email}`;
 };
 
 const updateUser = (id, data) => {

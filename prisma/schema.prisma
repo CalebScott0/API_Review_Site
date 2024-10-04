@@ -16,7 +16,6 @@ datasource db {
 model business {
   id                  String               @id @default(uuid())
   name                String
-  // average of all stars 1-5 from reviews rounded to nearest half number
   average_stars       Float                @default(0.0)
   review_count        Int                  @default(0)
   address             String?
@@ -41,7 +40,6 @@ model user {
   first_name    String?
   last_name     String?
   email         String?   @unique
-  // average stars from all reviews NOT ROUNDED
   average_stars Float     @default(0.0)
   review_count  Int       @default(0)
   comment_count Int       @default(0)
