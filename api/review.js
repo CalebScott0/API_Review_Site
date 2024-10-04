@@ -230,8 +230,10 @@ review_router.delete(
       res.sendStatus(204);
 
       // UPDATE ALL USERS WHO HAD COMMENTS FOR DELETED REVIEW
-      // DECREMENT FUNCTION - make a new one with updateMany for 
+      // DECREMENT FUNCTION - make a new one with updateMany for
       // ids in: [...]? !
+      // get all user ids by returning them with a sql db query
+      // for author_id from comments with given revew_id
     } catch (error) {
       next({
         name: "DeleteReviewFailed",
