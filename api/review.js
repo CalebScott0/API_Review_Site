@@ -5,7 +5,12 @@ const {
   deleteReview,
   getReviewById,
 } = require("../db/review");
-const { checkCreateReviewData } = require("./__utils__/review_utils");
+const {
+  checkCreateReviewData,
+  checkIsUserReview,
+  checkUpdateReviewData,
+  checkUserHasReview,
+} = require("./__utils__/review_utils");
 const { getBusinessById, updateBusiness } = require("../db/business");
 const { averageBusinessStars, averageUserStars } = require("../db/utils");
 const { getUserById, updateUser } = require("../db/user");
@@ -17,6 +22,8 @@ review_router.post(
   "/business/:business_id",
   // check if text & stars were provided
   checkCreateReviewData,
+  // check if user already has a review on provided business id
+  checkUserHasReview,
   async (req, res, next) => {
     try {
       const { stars } = req.body;
@@ -96,6 +103,10 @@ review_router.post(
 // PUT api/review/:review_id/business/:business_id
 review_router.put(
   "/:review_id/business/:business_id",
+  // check user is author of this review
+  checkIsUserReview,
+  // check correct data was given to update review
+  checkUpdateReviewData,
   async (req, res, next) => {
     try {
       const { business_id, review_id } = req.params;
@@ -169,6 +180,8 @@ review_router.put(
 // DELETE /api/review/:review_id/business/:business_id
 review_router.delete(
   "/:review_id/business/:business_id",
+  // check user is author of this review
+  checkIsUserReview,
   async (req, res, next) => {
     try {
       const { business_id, review_id } = req.params;

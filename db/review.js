@@ -28,9 +28,16 @@ const getReviewById = (id) => {
                           WHERE id = ${id}`;
 };
 
+const getUserReviewByBusiness = (author_id, business_id) => {
+  return prisma.$queryRaw`SELECT * FROM review
+                          WHERE author_id = ${author_id}
+                          AND business_id = ${business_id}`;
+};
+
 module.exports = {
   createReview,
   deleteReview,
   editReview,
   getReviewById,
+  getUserReviewByBusiness,
 };
