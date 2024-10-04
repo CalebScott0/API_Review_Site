@@ -6,10 +6,6 @@
   "scripts": {
     "seed_comments": "node --max-old-space-size=8192 ./prisma/seed_comments.js",
     "seed_comments2": "node --max-old-space-size=8192 ./prisma/seed_comments2.js",
-    "update_businesses": "node ./prisma/update_businesses.js",
-    "update_users": "node ./prisma/update_users.js",
-    "add_user_friends": "node ./prisma/user_friends_csv_stream.js",
-    "update_comment_count": "node ./prisma/update_comment_count.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "start:dev": "nodemon index.js"
