@@ -231,6 +231,7 @@ review_router.delete(
 
       // UPDATE ALL USERS WHO HAD COMMENTS FOR DELETED REVIEW
       // DECREMENT FUNCTION - DONT USE UPDATE MANY
+      // Promise.all?
       // because user could have multiple comments
       // or make the decrement function take 
       // a variable for the decrement!
