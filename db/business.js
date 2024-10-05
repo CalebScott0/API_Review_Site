@@ -29,7 +29,7 @@ const getBusinessByCategory = ({
   start_index = 0,
   limit = 10,
 }) => {
-  return prisma.$queryRaw`SELECT DISTINCT b.* FROM business b
+  return prisma.$queryRaw`EXPLAIN ANALYZE SELECT DISTINCT b.* FROM business b
                         JOIN category_business c ON c.business_id = b.id
                         WHERE category_name = ${category_name}
                         ORDER BY average_stars DESC, review_count DESC

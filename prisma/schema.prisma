@@ -14,17 +14,18 @@ datasource db {
 }
 
 model business {
-  id                  String               @id @default(uuid())
-  name                String
-  average_stars       Float                @default(0.0)
-  review_count        Int                  @default(0)
-  address             String?
-  city                String?
-  postal_code         String?
-  state               String?
-  is_open             Boolean              @default(false)
-  latitude            Float?
-  longitude           Float?
+  id            String  @id @default(uuid())
+  name          String
+  average_stars Float   @default(0.0)
+  review_count  Int     @default(0)
+  address       String?
+  city          String?
+  postal_code   String?
+  state         String?
+  is_open       Boolean @default(false)
+  latitude      Float?
+  longitude     Float?
+
   categories          category_business[]
   reviews             review[]
   photos              photo_business[]
@@ -34,28 +35,30 @@ model business {
 }
 
 model user {
-  id            String        @id @default(uuid())
-  username      String        @unique
+  id            String   @id @default(uuid())
+  username      String   @unique
   password      String
   first_name    String?
   last_name     String?
-  email         String?       @unique
-  average_stars Float         @default(0.0)
-  review_count  Int           @default(0)
-  comment_count Int           @default(0)
-  user_since    DateTime      @default(now())
+  email         String?  @unique
+  average_stars Float    @default(0.0)
+  review_count  Int      @default(0)
+  comment_count Int      @default(0)
+  user_since    DateTime @default(now())
   // useful, funny, and cool are the total of votes sent by the user to other reviews
-  useful        Int           @default(0)
-  funny         Int           @default(0)
-  cool          Int           @default(0)
+  useful        Int      @default(0)
+  funny         Int      @default(0)
+  cool          Int      @default(0)
   // fans = # of fans a user has (different than friends, fans only follow your account?)
-  fans          Int           @default(0)
-  reviews       review[]
-  comments      comment[]
-  tips          tip[]
-  user_friends  user_friends?
+  fans          Int      @default(0)
+
+  reviews      review[]
+  comments     comment[]
+  tips         tip[]
+  user_friends user_friends?
 }
 
+// BREAK APRT THIS TABLE
 model user_friends {
   user_id String   @unique
   user    user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -63,20 +66,22 @@ model user_friends {
 }
 
 model review {
-  id            String    @id @default(uuid())
+  id            String   @id @default(uuid())
   stars         Int
   review_text   String
-  useful        Int       @default(0)
-  funny         Int       @default(0)
-  cool          Int       @default(0)
-  comment_count Int       @default(0)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @default(now())
-  comments      comment[]
-  author_id     String
-  author        user      @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business_id   String
-  business      business  @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  useful        Int      @default(0)
+  funny         Int      @default(0)
+  cool          Int      @default(0)
+  comment_count Int      @default(0)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now())
+
+  comments comment[]
+
+  author_id   String
+  business_id String
+  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique(name: "unique_author_review", [author_id, business_id])
 }
@@ -86,10 +91,11 @@ model comment {
   comment_text String   @db.VarChar(255)
   created_at   DateTime @default(now())
   updated_at   DateTime @default(now())
-  author_id    String
-  author       user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  review_id    String
-  review       review   @relation(fields: [review_id], references: [id], onDelete: Cascade)
+
+  author_id String
+  review_id String
+  author    user   @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  review    review @relation(fields: [review_id], references: [id], onDelete: Cascade)
 }
 
 model category {
@@ -100,35 +106,38 @@ model category {
 
 model category_business {
   category_name String
-  business_id   String
-  business      business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  category_id   String
-  category      category @relation(fields: [category_id], references: [id])
+
+  business_id String
+  category_id String
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  category    category @relation(fields: [category_id], references: [id])
 
   @@unique([business_id, category_id])
 }
 
 model photo_business {
-  id          String   @id @default(uuid())
-  caption     String?
-  label       String?
+  id      String  @id @default(uuid())
+  caption String?
+  label   String?
+
   business_id String
   business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 }
 
 model tip {
-  created_at  DateTime @default(now())
-  tip_text    String
+  created_at DateTime @default(now())
+  tip_text   String
+
   author_id   String
-  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
   business_id String
+  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
   business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique([author_id, business_id])
 }
 
 model business_hours {
-  business_id String   @unique
+  business_id String  @unique
   monday      String?
   tuesday     String?
   wednesday   String?
@@ -136,13 +145,15 @@ model business_hours {
   friday      String?
   saturday    String?
   sunday      String?
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 }
 
 // split this later into attribute categories, do this the same way as categories! (Many to Many relationship!)
 model business_attributes {
-  business_id                   String   @unique
-  business                      business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  business_id String   @unique
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
   accepts_insurance             String?
   alcohol                       String?
   ambience                      String?

@@ -48,18 +48,21 @@ async function processCSV() {
       console.log(((count / 4208370) * 100).toFixed(2) + "%");
     }
   }
-  let reviews_created = 1309040;
+  let reviews_created = 1409680;
   reviews = reviews.slice(reviews_created);
   while (reviews.length) {
-    const data = reviews.splice(0, 680);
+    const data = reviews.splice(0, 1000);
 
     reviews_created += data.length;
 
     console.log(`Creating ${data.length} Reviews`);
 
     console.time("Create");
-
-    await prisma.review.createMany({ data });
+    try {
+      await prisma.review.createMany({ data });
+    } catch (error) {
+      console.log(error);
+    }
 
     console.timeEnd("Create");
 
