@@ -80,10 +80,13 @@ model review {
 
   author_id   String
   business_id String
-  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  author   user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique(name: "unique_author_review", [author_id, business_id])
+  @@index([business_id, created_at])
+  @@index([author_id, created_at])
 }
 
 model comment {
@@ -94,8 +97,12 @@ model comment {
 
   author_id String
   review_id String
-  author    user   @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  review    review @relation(fields: [review_id], references: [id], onDelete: Cascade)
+
+  author user   @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  review review @relation(fields: [review_id], references: [id], onDelete: Cascade)
+
+  @@index([review_id, created_at])
+  @@index([author_id, created_at])
 }
 
 model category {
@@ -105,14 +112,15 @@ model category {
 }
 
 model category_business {
-  category_name String
-
+  id          String @id @default(uuid())
   business_id String
   category_id String
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  category    category @relation(fields: [category_id], references: [id])
+
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  category category @relation(fields: [category_id], references: [id])
 
   @@unique([business_id, category_id])
+  @@index([category_id])
 }
 
 model photo_business {
@@ -122,6 +130,8 @@ model photo_business {
 
   business_id String
   business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@index([business_id])
 }
 
 model tip {
@@ -130,10 +140,13 @@ model tip {
 
   author_id   String
   business_id String
-  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  author   user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique([author_id, business_id])
+  @@index([business_id, created_at])
+  @@index([author_id, created_at])
 }
 
 model business_hours {
@@ -151,8 +164,9 @@ model business_hours {
 
 // split this later into attribute categories, do this the same way as categories! (Many to Many relationship!)
 model business_attributes {
-  business_id String   @unique
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  business_id String @unique
+
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   accepts_insurance             String?
   alcohol                       String?

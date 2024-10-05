@@ -4,15 +4,16 @@ const getBusinessById = async (id) => {
   const [business, categories] = await Promise.all([
     prisma.$queryRaw`SELECT * FROM business
                         WHERE id = ${id}`,
-    prisma.$queryRaw`SELECT category_name FROM category_business
-                    WHERE business_id = ${id}`,
+    prisma.$queryRaw`SELECT * FROM category c
+                    JOIN category_business cb ON c.id = cb.category_id 
+                    WHERE cb.business_id = ${id}`,
   ]);
   // return object with business and associated categories
   //  without check, categories will always exist even if empty array
   if (categories.length) {
     return {
       ...business[0],
-      categories: categories.map((x) => x.category_name),
+      categories: categories.map((x) => x.name),
     };
     // throws error in endpoint
   } else {
@@ -25,13 +26,14 @@ const getAllBusinesses = () => {
 };
 
 const getBusinessByCategory = ({
-  category_name,
+  category_id,
   start_index = 0,
   limit = 10,
 }) => {
-  return prisma.$queryRaw`EXPLAIN ANALYZE SELECT DISTINCT b.* FROM business b
+  console.log();
+  return prisma.$queryRaw`SELECT DISTINCT b.* FROM business b
                         JOIN category_business c ON c.business_id = b.id
-                        WHERE category_name = ${category_name}
+                        WHERE category_id = ${category_id}
                         ORDER BY average_stars DESC, review_count DESC
                         LIMIT ${limit} OFFSET ${start_index}`;
 };
