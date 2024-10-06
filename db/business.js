@@ -1,12 +1,15 @@
 const prisma = require("./index");
+const { getCategoriesForBusiness } = require("./category");
 
 const getBusinessById = async (id) => {
   const [business, categories] = await Promise.all([
     prisma.$queryRaw`SELECT * FROM business
                         WHERE id = ${id}`,
-    prisma.$queryRaw`SELECT * FROM category c
-                    JOIN category_business cb ON c.id = cb.category_id 
-                    WHERE cb.business_id = ${id}`,
+    getCategoriesForBusiness(id),
+    // REPLACE WITH GET CATEGORIES FOR BUSINESS QUERY
+    // prisma.$queryRaw`SELECT * FROM category c
+    //                 LEFT JOIN category_business cb ON c.id = cb.category_id
+    //                 WHERE cb.business_id = ${id}`,
   ]);
   // return object with business and associated categories
   //  without check, categories will always exist even if empty array
@@ -32,7 +35,7 @@ const getBusinessByCategory = ({
 }) => {
   console.log();
   return prisma.$queryRaw`SELECT DISTINCT b.* FROM business b
-                        JOIN category_business c ON c.business_id = b.id
+                        JOIN category_business cb ON b.id = cb.business_id
                         WHERE category_id = ${category_id}
                         ORDER BY average_stars DESC, review_count DESC
                         LIMIT ${limit} OFFSET ${start_index}`;

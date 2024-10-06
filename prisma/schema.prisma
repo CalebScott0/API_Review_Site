@@ -43,7 +43,6 @@ model user {
   email         String?  @unique
   average_stars Float    @default(0.0)
   review_count  Int      @default(0)
-  // comment_count Int      @default(0)
   user_since    DateTime @default(now())
   // useful, funny, and cool are the total of votes sent by the user to other reviews
   useful        Int      @default(0)
@@ -52,19 +51,22 @@ model user {
   // fans = # of fans a user has (different than friends, fans only follow your account?)
   fans          Int      @default(0)
 
-  reviews review[]
-  tips    tip[]
-  friends user_friend[]
-
-  // comments     comment[]
+  reviews     review[]
+  tips        tip[]
+  friends     user_friend[]
+  user_friend user_friend[] @relation("User_Friend_Relation")
 }
 
 model user_friend {
   user_id   String
-  user      user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
   friend_id String
+  // CREATED_AT FOR HOW LONG YOU'VE BEEN FRIENDS?
+  // WOULD NEED TO SEED RANDOM FOR ALL FRIENDS
 
-  @@unique([user_id, friend_id])
+  user   user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  friend user @relation("User_Friend_Relation", fields: [friend_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, friend_id]) // - composite PK to enforce uniqueness
   @@index([user_id])
 }
 
@@ -75,11 +77,8 @@ model review {
   useful      Int      @default(0)
   funny       Int      @default(0)
   cool        Int      @default(0)
-  // comment_count Int      @default(0)
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now())
-
-  // comments comment[]
 
   author_id   String
   business_id String
@@ -92,22 +91,6 @@ model review {
   @@index([business_id, created_at])
 }
 
-// model comment {
-//   id           String   @id @default(uuid())
-//   comment_text String   @db.VarChar(255)
-//   created_at   DateTime @default(now())
-//   updated_at   DateTime @default(now())
-
-//   author_id String
-//   review_id String
-
-//   author user   @relation(fields: [author_id], references: [id], onDelete: Cascade)
-//   review review @relation(fields: [review_id], references: [id], onDelete: Cascade)
-
-//   @@index([author_id, created_at])
-//   @@index([review_id, created_at])
-// }
-
 model category {
   id   String @id @default(uuid())
   name String @unique
@@ -116,15 +99,14 @@ model category {
 }
 
 model category_business {
-  id          String @id @default(uuid())
   business_id String
   category_id String
 
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
   category category @relation(fields: [category_id], references: [id])
 
-  @@unique([business_id, category_id])
-  @@index([category_id])
+  @@id([business_id, category_id])
+  @@index([business_id])
 }
 
 model photo_business {

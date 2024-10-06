@@ -7,6 +7,7 @@ const prisma = new PrismaClient({
 });
 
 let errorCount = 0;
+let count = 0;
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
@@ -32,6 +33,8 @@ async function processCSV() {
             friend_id,
           },
         });
+        count++;
+        if (count % 1000 === 0) console.log(count);
       } catch (error) {
         console.log(error);
         errorCount++;

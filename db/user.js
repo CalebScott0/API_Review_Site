@@ -20,7 +20,7 @@ const getUserByUsername = (username) => {
 };
 const getUserByEmail = (email) => {
   return prisma.$queryRaw`SELECT * FROM "user"
-                        WHERE id = ${id}`;
+                        WHERE email = ${email}`;
 };
 
 const updateUser = (id, data) => {
