@@ -30,27 +30,6 @@ const updateUser = (id, data) => {
   });
 };
 
-const incrementUserCommentCount = (id) => {
-  return prisma.user.update({
-    where: { id },
-    data: {
-      comment_count: {
-        increment: 1,
-      },
-    },
-  });
-};
-const decrementUserCommentCount = (id) => {
-  return prisma.user.update({
-    where: { id },
-    data: {
-      comment_count: {
-        decrement: 1,
-      },
-    },
-  });
-};
-
 module.exports = {
   createUser,
   decrementUserCommentCount,

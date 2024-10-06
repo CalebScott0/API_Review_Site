@@ -17,27 +17,6 @@ const updateReview = (id, data) => {
   }
 };
 
-const incrementReviewCommentCount = (id) => {
-  return prisma.review.update({
-    where: { id },
-    data: {
-      comment_count: {
-        increment: 1,
-      },
-    },
-  });
-};
-const decrementReviewCommentCount = (id) => {
-  return prisma.review.update({
-    where: { id },
-    data: {
-      comment_count: {
-        decrement: 1,
-      },
-    },
-  });
-};
-
 const deleteReview = (id) => {
   return prisma.review.delete({
     where: { id },

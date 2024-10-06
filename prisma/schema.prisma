@@ -43,7 +43,7 @@ model user {
   email         String?  @unique
   average_stars Float    @default(0.0)
   review_count  Int      @default(0)
-  comment_count Int      @default(0)
+  // comment_count Int      @default(0)
   user_since    DateTime @default(now())
   // useful, funny, and cool are the total of votes sent by the user to other reviews
   useful        Int      @default(0)
@@ -53,30 +53,39 @@ model user {
   fans          Int      @default(0)
 
   reviews      review[]
-  comments     comment[]
   tips         tip[]
   user_friends user_friends?
+  // comments     comment[]
 }
 
 // BREAK APRT THIS TABLE
 model user_friends {
+  // model user_friend {
+  // id          String   @id @default(uuid())
+  // user_id     String
+  // user        user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  // friend_id   String
+  // friend      user     @relation(fields: [friend_id], references: [id], onDelete: Cascade)
+
+  // @@unique([user_id, friend_id])
+  // }
   user_id String   @unique
   user    user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   friends String[]
 }
 
 model review {
-  id            String   @id @default(uuid())
-  stars         Int
-  review_text   String
-  useful        Int      @default(0)
-  funny         Int      @default(0)
-  cool          Int      @default(0)
-  comment_count Int      @default(0)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @default(now())
+  id          String   @id @default(uuid())
+  stars       Int
+  review_text String
+  useful      Int      @default(0)
+  funny       Int      @default(0)
+  cool        Int      @default(0)
+  // comment_count Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
 
-  comments comment[]
+  // comments comment[]
 
   author_id   String
   business_id String
@@ -85,29 +94,30 @@ model review {
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique(name: "unique_author_review", [author_id, business_id])
+  @@index([author_id, created_at])
   @@index([business_id, created_at])
-  @@index([author_id, created_at])
 }
 
-model comment {
-  id           String   @id @default(uuid())
-  comment_text String   @db.VarChar(255)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @default(now())
+// model comment {
+//   id           String   @id @default(uuid())
+//   comment_text String   @db.VarChar(255)
+//   created_at   DateTime @default(now())
+//   updated_at   DateTime @default(now())
 
-  author_id String
-  review_id String
+//   author_id String
+//   review_id String
 
-  author user   @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  review review @relation(fields: [review_id], references: [id], onDelete: Cascade)
+//   author user   @relation(fields: [author_id], references: [id], onDelete: Cascade)
+//   review review @relation(fields: [review_id], references: [id], onDelete: Cascade)
 
-  @@index([review_id, created_at])
-  @@index([author_id, created_at])
-}
+//   @@index([author_id, created_at])
+//   @@index([review_id, created_at])
+// }
 
 model category {
-  id                    String              @id @default(uuid())
-  name                  String              @unique
+  id   String @id @default(uuid())
+  name String @unique
+
   categories_businesses category_business[]
 }
 
@@ -135,6 +145,7 @@ model photo_business {
 }
 
 model tip {
+  id         String   @id @default(uuid())
   created_at DateTime @default(now())
   tip_text   String
 
@@ -145,12 +156,12 @@ model tip {
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique([author_id, business_id])
-  @@index([business_id, created_at])
   @@index([author_id, created_at])
+  @@index([business_id, created_at])
 }
 
 model business_hours {
-  business_id String  @unique
+  business_id String  @id
   monday      String?
   tuesday     String?
   wednesday   String?
@@ -164,7 +175,7 @@ model business_hours {
 
 // split this later into attribute categories, do this the same way as categories! (Many to Many relationship!)
 model business_attributes {
-  business_id String @unique
+  business_id String @id
 
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
