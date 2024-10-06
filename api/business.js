@@ -2,7 +2,7 @@ const express = require("express");
 const business_router = express.Router();
 const {
   getAllBusinesses,
-  getBusinessByCategory,
+  getBusinessesByCategory,
   getBusinessById,
 } = require("../db/business");
 
@@ -14,10 +14,27 @@ business_router.get("/:id", async (req, res, next) => {
     res.send({ business });
   } catch (error) {
     next({
-      name: "BusinessNotFound",
+      name: "BusinessFetchError",
       message: "Unable to find Business, check id is valid",
     });
   }
 });
 
+// GET /api/business/category/:category_id
+business_router.get("/category/:category_id", async (req, res, next) => {
+  try {
+    const { category_id } = req.params;
+    const businesses = await getBusinessesByCategory({
+      category_id,
+    });
+
+    res.send({ businesses });
+  } catch (error) {
+    next({
+      name: "BusinessByCategoryFetchError",
+      message:
+        "Unable to find businesses by category, check category id is valid",
+    });
+  }
+});
 module.exports = business_router;
