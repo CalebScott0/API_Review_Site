@@ -21,6 +21,11 @@ async function processCSV() {
       try {
         // TRY THIS WITH CREATE MANY!! or use gigasheet to break apart
         //  friends!!
+        //  think about best way to store them again, ask gpt?
+        //  REMEMBER if a user is deleted, they must be removed from all users friends list
+        //  DO NOT SPEND TOO MUCH TIME ON THIS
+        //  YOU CAN ALWAYS COME BACK AND WORK ON USER FRIENDS(MAKE A NOTE) AFTER
+        // FRONT END IS STARTED!!!
         await prisma.user_friend.create({
           data: {
             user_id,
