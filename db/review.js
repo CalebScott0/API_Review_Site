@@ -36,10 +36,8 @@ const getUserReviewByBusiness = (author_id, business_id) => {
 
 module.exports = {
   createReview,
-  decrementReviewCommentCount,
   deleteReview,
   getReviewById,
   getUserReviewByBusiness,
-  incrementReviewCommentCount,
   updateReview,
 };

@@ -32,8 +32,6 @@ const updateUser = (id, data) => {
 
 module.exports = {
   createUser,
-  decrementUserCommentCount,
-  incrementUserCommentCount,
   getUserByEmail,
   getUserById,
   getUserByUsername,
