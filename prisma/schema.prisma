@@ -52,20 +52,17 @@ model user {
   // fans = # of fans a user has (different than friends, fans only follow your account?)
   fans          Int      @default(0)
 
-  reviews     review[]
-  tips        tip[]
-  friends     user_friend?
-  user_friend user_friend? @relation("user")
+  reviews review[]
+  tips    tip[]
+  friends user_friend[]
 
   // comments     comment[]
 }
 
-// BREAK APRT THIS TABLE
 model user_friend {
-  user_id   String @unique
-  user      user   @relation("user", fields: [user_id], references: [id], onDelete: Cascade)
-  friend_id String @unique
-  friend    user   @relation(fields: [friend_id], references: [id], onDelete: Cascade)
+  user_id   String
+  user      user   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  friend_id String
 
   @@unique([user_id, friend_id])
   @@index([user_id])
