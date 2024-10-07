@@ -3,6 +3,16 @@ const user_router = express.Router();
 
 const { getUserById } = require("../db/user");
 
+// GET /api/user/
+user.router.get("/", async (req, res, next) => {
+  try {
+  } catch (error) {
+    next({
+      name: "",
+    });
+  }
+});
+
 // GET /api/user/:id
 user_router.get("/:id", async (req, res, next) => {
   try {

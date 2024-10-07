@@ -69,10 +69,27 @@ business_router.get("/category/:category_id", async (req, res, next) => {
   }
 });
 
-business_router.get("/:business_id/reviews"),
-  async (req, res, next) => {
-    // LOOK AT CAPSTONE API FOLDER FOR
-    // REQUEST PARAMETERS WITH LIMIT AND INDEX
-  };
+business_router.get("/reviews/:business_id", async (req, res, next) => {
+  const { limit, offset } = req.query;
+  const { business_id } = req.params;
+  console.log(business_id);
+  try {
+    const reviews = await getReviewsForBusiness({
+      business_id,
+      // parse to int as they will be string from req
+      limit: +limit,
+      offset: +offset,
+    });
+
+    res.send({ reviews });
+  } catch (error) {
+    next({
+      name: "ReviewFetchError",
+      message: "Unable to fetch reviews for business",
+    });
+  }
+  // LOOK AT CAPSTONE API FOLDER FOR
+  // REQUEST PARAMETERS WITH LIMIT AND INDEX
+});
 
 module.exports = business_router;
