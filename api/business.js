@@ -16,15 +16,15 @@ business_router.get("/:id", async (req, res, next) => {
       getBusinessById(id),
       getCategoriesForBusiness(id),
     ]);
-    // if (categories.length) {
-    business = {
-      ...business[0],
-      categories: categories.map((x) => x.name),
-    };
-    // throws error in endpoint
-    // } else {
-    // throw new Error();
-    // }
+    if (categories.length) {
+      business = {
+        ...business[0],
+        categories: categories.map((x) => x.name),
+      };
+      // throws error in endpoint
+    } else {
+      throw new Error();
+    }
 
     res.send({ business });
   } catch (error) {
