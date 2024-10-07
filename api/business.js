@@ -8,6 +8,7 @@ const {
 } = require("../db/business");
 const { getCategoriesForBusiness } = require("../db/category");
 const { getReviewsForBusiness } = require("../db/review");
+const { getPhotosForBusiness } = require("../db/photo");
 
 // GET /api/business/:id
 business_router.get("/:id", async (req, res, next) => {
@@ -50,7 +51,7 @@ business_router.get("/category/:category_id", async (req, res, next) => {
       limit: +limit,
       offset: +offset,
     });
-    const businesses = await Promise.all(
+    const business_list = await Promise.all(
       // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
       // get categories for business
       get_businesses.map(async (business) => {
@@ -69,7 +70,7 @@ business_router.get("/category/:category_id", async (req, res, next) => {
       })
     );
 
-    res.send({ businesses });
+    res.send({ business_list });
   } catch (error) {
     next({
       name: "BusinessByCategoryFetchError",
@@ -79,27 +80,40 @@ business_router.get("/category/:category_id", async (req, res, next) => {
   }
 });
 
-business_router.get("/:business_id/reviews", async (req, res, next) => {
-  const { limit, offset } = req.query;
+// GET /business/reviews/:busienss_id
+business_router.get("/reviews/:business_id", async (req, res, next) => {
   const { business_id } = req.params;
-  console.log(business_id);
+  const { limit, offset } = req.query;
   try {
-    const reviews = await getReviewsForBusiness({
+    const business_reviews = await getReviewsForBusiness({
       business_id,
       // parse to int as they will be string from req
       limit: +limit,
       offset: +offset,
     });
 
-    res.send({ reviews });
+    res.send({ business_reviews });
   } catch (error) {
     next({
       name: "ReviewFetchError",
       message: "Unable to fetch reviews for business",
     });
   }
-  // LOOK AT CAPSTONE API FOLDER FOR
-  // REQUEST PARAMETERS WITH LIMIT AND INDEX
+});
+
+// GET /business/photos/:business_id
+business_router.get("/photos/:business_id", async (req, res, next) => {
+  const { business_id } = req.params;
+  try {
+    const business_photos = await getPhotosForBusiness(business_id);
+
+    res.send({ business_photos });
+  } catch (error) {
+    next({
+      name: "PhotoFetchError",
+      message: "Unable to fetch photos for business",
+    });
+  }
 });
 
 module.exports = business_router;

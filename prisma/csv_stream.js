@@ -32,37 +32,40 @@ async function processCSV() {
         friendsArr.push({ user_id, friend_id });
       }
       if (friendsArr.length === 10000) {
-        //   try {
-        //     await prisma.$transaction(async (prisma) => {
-        //       await prisma.user_friend.createMany({
-        //         data: friendsArr,
-        //         skipDuplicates: true, // To avoid duplicates if the seeding is rerun
-        //       });
-        //     });
-        console.log(`Inserted ${friendsArr.length} records`);
-        friendsArr.length = 0;
-        set.clear();
-        //   } catch (error) {
-        //     console.error("Unable to create batch:", error);
-        //   }
-        // }
+        (async () => {
+          try {
+            await prisma.$transaction(async (prisma) => {
+              await prisma.user_friend.createMany({
+                data: friendsArr,
+                skipDuplicates: true, // To avoid duplicates if the seeding is rerun
+              });
+            });
+            console.log(`Inserted ${friendsArr.length} records :)`);
+            friendsArr.length = 0;
+            set.clear();
+          } catch (error) {
+            console.error("Unable to create batch:", error);
+          }
+        })();
       }
-      // DELETE THE 2 USERS WITHOUT FRIENDS AFTER SEEDED?
     }
-    // remaining records
+    // DELETE THE 2 USERS WITHOUT FRIENDS AFTER SEEDED?
   }
+  // remaining records
   if (friendsArr.length > 0) {
-    // try {
-    //   await prisma.$transaction(async (prisma) => {
-    //     await prisma.user_friend.createMany({
-    //       data: friendsArr,
-    //       skipDuplicates: true, // To avoid duplicates if the seeding is rerun
-    //     });
-    //   });
-    console.log(`Inserted ${friendsArr.length} records`);
-    // } catch (error) {
-    //   console.error("Unable to create batch:", error);
-    // }
+    (async () => {
+      try {
+        await prisma.$transaction(async (prisma) => {
+          await prisma.user_friend.createMany({
+            data: friendsArr,
+            skipDuplicates: true, // To avoid duplicates if the seeding is rerun
+          });
+        });
+        console.log(`Inserted ${friendsArr.length} records, done!`);
+      } catch (error) {
+        console.error("Unable to create batch:", error);
+      }
+    })();
   }
 }
 

@@ -7,11 +7,6 @@ const createUser = (data) => {
 const getUserById = (id) => {
   return prisma.$queryRaw`SELECT * FROM "user"
                         WHERE id = ${id}`;
-  /*
-   *return prisma.user.findUnique({
-   *  where: { id },
-   *});
-   */
 };
 
 const getUserByUsername = (username) => {

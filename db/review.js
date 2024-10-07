@@ -36,6 +36,13 @@ const getReviewsForBusiness = ({ business_id, limit = 1, offset = 0 }) => {
                           LIMIT ${limit} OFFSET ${offset}`;
 };
 
+const getReviewsForUser = ({ author_id, limit = 10, offset = 0 }) => {
+  return prisma.$queryRaw`SELECT * FROM review
+                          WHERE auhor_id = ${author_id}
+                          ORDER BY created_at DESC
+                          LIMIT ${limit} OFFSET ${offset}`;
+};
+
 const getUserReviewByBusiness = (author_id, business_id) => {
   return prisma.$queryRaw`SELECT * FROM review
                           WHERE author_id = ${author_id}
@@ -47,6 +54,7 @@ module.exports = {
   deleteReview,
   getReviewById,
   getReviewsForBusiness,
+  getReviewsForUser,
   getUserReviewByBusiness,
   updateReview,
 };
