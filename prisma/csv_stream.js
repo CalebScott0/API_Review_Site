@@ -31,7 +31,7 @@ async function processCSV() {
         set.add(pair);
         friendsArr.push({ user_id, friend_id });
       }
-      if (friendsArr.length === 10000) {
+      if (friendsArr.length === 1000) {
         (async () => {
           try {
             await prisma.$transaction(async (prisma) => {
@@ -49,7 +49,7 @@ async function processCSV() {
         })();
       }
     }
-    // DELETE THE 2 USERS WITHOUT FRIENDS AFTER SEEDED?
+    // - 2 USERS W/O FRIENDS ARE THE TEST USERS - delete
   }
   // remaining records
   if (friendsArr.length > 0) {
