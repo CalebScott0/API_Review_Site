@@ -1,6 +1,6 @@
 const prisma = require("./index");
 
-const getBusinessById = (id) => {
+const getBusinessById = async (id) => {
   return prisma.$queryRaw`SELECT * FROM business
                         WHERE id = ${id}`;
 };

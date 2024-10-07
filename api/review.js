@@ -30,13 +30,13 @@ review_router.post(
 
       const author_id = req.user.id;
       const { business_id } = req.params;
-
       // find business and user from associated review
       let [business, user] = await Promise.all([
         getBusinessById(business_id),
         getUserById(author_id),
       ]);
-      // user is object inside of array, take out object
+      // user/business is object inside of array, take out object
+      business = business[0];
       user = user[0];
       // add 1 to business review count
       const new_business_review_count = business.review_count + 1;
@@ -71,7 +71,6 @@ review_router.post(
        *  so business and user will not be updated if review
        * is not created
        */
-
       const [updated_business, updated_user, review] = await Promise.all([
         updateBusiness(business_id, {
           average_stars: new_business_average_stars,
@@ -88,7 +87,6 @@ review_router.post(
           business_id,
         }),
       ]);
-
       res.status(201).send({ review });
     } catch (error) {
       next({
@@ -122,6 +120,7 @@ review_router.put(
         ]);
         user = user[0];
         review = review[0];
+        business = business[0];
 
         // stars to reaverage should equal new star rating - original rating
         // example: if original review had 5 stars
@@ -194,6 +193,7 @@ review_router.delete(
       ]);
       user = user[0];
       review = review[0];
+      business = business[0];
 
       const new_business_review_count = business.review_count - 1;
       // stars is negative as we are deleting
