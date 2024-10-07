@@ -4,12 +4,13 @@ const user_router = express.Router();
 const { getUserById } = require("../db/user");
 
 // GET /api/user/
-user.router.get("/", async (req, res, next) => {
+user_router.get("/", async (req, res, next) => {
   try {
-  } catch (error) {
-    next({
-      name: "",
-    });
+    delete req.user.password;
+
+    res.send({ user: req.user });
+  } catch ({ name, message }) {
+    next({ name, message });
   }
 });
 

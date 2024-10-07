@@ -4,6 +4,7 @@ const {
   getAllBusinesses,
   getBusinessesByCategory,
   getBusinessById,
+  getBusinessHours,
 } = require("../db/business");
 const { getCategoriesForBusiness } = require("../db/category");
 const { getReviewsForBusiness } = require("../db/review");
@@ -12,20 +13,23 @@ const { getReviewsForBusiness } = require("../db/review");
 business_router.get("/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
-    let [business, categories] = await Promise.all([
+    let [business, business_hours, categories] = await Promise.all([
       getBusinessById(id),
+      getBusinessHours(id),
       getCategoriesForBusiness(id),
     ]);
+    console.log(categories.length);
+
     if (categories.length) {
       business = {
         ...business[0],
+        hours: business_hours[0],
         categories: categories.map((x) => x.name),
       };
       // throws error in endpoint
     } else {
       throw new Error();
     }
-
     res.send({ business });
   } catch (error) {
     next({
@@ -40,21 +44,27 @@ business_router.get("/:id", async (req, res, next) => {
 business_router.get("/category/:category_id", async (req, res, next) => {
   try {
     const { category_id } = req.params;
+    const { limit, offset } = req.query;
     const get_businesses = await getBusinessesByCategory({
       category_id,
+      limit: +limit,
+      offset: +offset,
     });
     const businesses = await Promise.all(
       // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
       // get categories for business
       get_businesses.map(async (business) => {
-        let [review, categories] = await Promise.all([
+        // let [business_hours, categories] = await Promise.all([
+        let [review, business_hours, categories] = await Promise.all([
           getReviewsForBusiness({ business_id: business.id }),
+          getBusinessHours(business.id),
           getCategoriesForBusiness(business.id),
         ]);
         return {
           ...business,
+          hours: business_hours[0],
           categories,
-          recent_review: review,
+          recent_review: review[0],
         };
       })
     );
@@ -69,7 +79,7 @@ business_router.get("/category/:category_id", async (req, res, next) => {
   }
 });
 
-business_router.get("/reviews/:business_id", async (req, res, next) => {
+business_router.get("/:business_id/reviews", async (req, res, next) => {
   const { limit, offset } = req.query;
   const { business_id } = req.params;
   console.log(business_id);

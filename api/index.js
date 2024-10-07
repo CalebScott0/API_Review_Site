@@ -45,7 +45,7 @@ api_router.use(async (req, res, next) => {
 api_router.use("/business", require("./business"));
 
 // /api/user
-api_router.use("/user", require("./user"));
+api_router.use("/user", requireUser, require("./user"));
 
 // /api/auth
 api_router.use("/auth", require("./auth/auth"));
