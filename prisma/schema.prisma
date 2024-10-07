@@ -60,6 +60,7 @@ model user {
 model user_friend {
   user_id   String
   friend_id String
+
   // CREATED_AT FOR HOW LONG YOU'VE BEEN FRIENDS?
   // WOULD NEED TO SEED RANDOM FOR ALL FRIENDS
 

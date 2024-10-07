@@ -1,27 +1,8 @@
 const prisma = require("./index");
-const { getCategoriesForBusiness } = require("./category");
 
-const getBusinessById = async (id) => {
-  const [business, categories] = await Promise.all([
-    prisma.$queryRaw`SELECT * FROM business
-                        WHERE id = ${id}`,
-    getCategoriesForBusiness(id),
-    // REPLACE WITH GET CATEGORIES FOR BUSINESS QUERY
-    // prisma.$queryRaw`SELECT * FROM category c
-    //                 LEFT JOIN category_business cb ON c.id = cb.category_id
-    //                 WHERE cb.business_id = ${id}`,
-  ]);
-  // return object with business and associated categories
-  //  without check, categories will always exist even if empty array
-  if (categories.length) {
-    return {
-      ...business[0],
-      categories: categories.map((x) => x.name),
-    };
-    // throws error in endpoint
-  } else {
-    throw new Error();
-  }
+const getBusinessById = (id) => {
+  return prisma.$queryRaw`SELECT * FROM business
+                        WHERE id = ${id}`;
 };
 
 const getAllBusinesses = () => {

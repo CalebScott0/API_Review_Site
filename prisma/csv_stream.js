@@ -1,13 +1,13 @@
 const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 const { parse } = require("csv-parse");
+const { user_friend } = require("../db");
 
 const prisma = new PrismaClient({
   log: ["info"],
 });
 
-let errorCount = 0;
-let count = 0;
+let friendsArr = [];
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
@@ -17,31 +17,13 @@ async function processCSV() {
     .pipe(parse({ from_line: 2 }));
   for await (const record of parser) {
     const user_id = record[0];
-    const friends = record[1].split(",");
-    for (const friend_id of friends) {
-      try {
-        // TRY THIS WITH CREATE MANY!! or use gigasheet to break apart
-        //  friends!!
-        //  think about best way to store them again, ask gpt?
-        //  REMEMBER if a user is deleted, they must be removed from all users friends list
-        //  DO NOT SPEND TOO MUCH TIME ON THIS
-        //  YOU CAN ALWAYS COME BACK AND WORK ON USER FRIENDS(MAKE A NOTE) AFTER
-        // FRONT END IS STARTED!!!
-        await prisma.user_friend.create({
-          data: {
-            user_id,
-            friend_id,
-          },
-        });
-        count++;
-        if (count % 1000 === 0) console.log(count);
-      } catch (error) {
-        console.log(error);
-        errorCount++;
-      }
-    }
+    const user_friends = record[1];
+    friendsArr.push({
+      user_id: user_id,
+      friends: user_friends,
+    });
   }
-  console.log(errorCount);
+  console.log(friendsArr.length);
 }
 processCSV()
   .then(async () => {

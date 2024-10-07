@@ -5,11 +5,26 @@ const {
   getBusinessesByCategory,
   getBusinessById,
 } = require("../db/business");
+const { getCategoriesForBusiness } = require("../db/category");
+const { getReviewsForBusiness } = require("../db/review");
 
 // GET /api/business/:id
 business_router.get("/:id", async (req, res, next) => {
   try {
-    const business = await getBusinessById(req.params.id);
+    const { id } = req.params;
+    let [business, categories] = await Promise.all([
+      getBusinessById(id),
+      getCategoriesForBusiness(id),
+    ]);
+    // if (categories.length) {
+    business = {
+      ...business[0],
+      categories: categories.map((x) => x.name),
+    };
+    // throws error in endpoint
+    // } else {
+    // throw new Error();
+    // }
 
     res.send({ business });
   } catch (error) {
@@ -24,9 +39,24 @@ business_router.get("/:id", async (req, res, next) => {
 business_router.get("/category/:category_id", async (req, res, next) => {
   try {
     const { category_id } = req.params;
-    const businesses = await getBusinessesByCategory({
+    const get_businesses = await getBusinessesByCategory({
       category_id,
     });
+    const businesses = await Promise.all(
+      // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
+      // get categories for business
+      get_businesses.map(async (business) => {
+        let [review, categories] = await Promise.all([
+          getReviewsForBusiness({ business_id: business.id }),
+          getCategoriesForBusiness(business.id),
+        ]);
+        return {
+          ...business,
+          categories,
+          recent_review: review,
+        };
+      })
+    );
 
     res.send({ businesses });
   } catch (error) {
