@@ -53,8 +53,8 @@ model user {
 
   reviews     review[]
   tips        tip[]
-  friends     user_friend[]
   user_friend user_friend[] @relation("User_Friend_Relation")
+  friends     user_friend[]
 }
 
 model user_friend {
@@ -67,7 +67,7 @@ model user_friend {
   user   user @relation(fields: [user_id], references: [id], onDelete: Cascade)
   friend user @relation("User_Friend_Relation", fields: [friend_id], references: [id], onDelete: Cascade)
 
-  @@id([user_id, friend_id]) // - composite PK to enforce uniqueness
+  @@id([user_id, friend_id])
   @@index([user_id])
 }
 

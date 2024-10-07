@@ -1,13 +1,13 @@
 const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 const { parse } = require("csv-parse");
-const { user_friend } = require("../db");
 
 const prisma = new PrismaClient({
   log: ["info"],
 });
 
 let friendsArr = [];
+let set = new Set();
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
@@ -17,14 +17,55 @@ async function processCSV() {
     .pipe(parse({ from_line: 2 }));
   for await (const record of parser) {
     const user_id = record[0];
-    const user_friends = record[1];
-    friendsArr.push({
-      user_id: user_id,
-      friends: user_friends,
-    });
+    const user_friends = record[1].split(", ");
+    for (const friend_id of user_friends) {
+      const pair = `${user_id}-${friend_id}`;
+      const friendExists = await prisma.user.findUnique({
+        where: { id: friend_id },
+      });
+      if (!friendExists) {
+        // console.error(`Friend with ID ${friend_id} does not exist.`);
+        continue; // Skip this friend if they don't exist
+      }
+      if (!set.has(pair)) {
+        set.add(pair);
+        friendsArr.push({ user_id, friend_id });
+      }
+      if (friendsArr.length === 10000) {
+        //   try {
+        //     await prisma.$transaction(async (prisma) => {
+        //       await prisma.user_friend.createMany({
+        //         data: friendsArr,
+        //         skipDuplicates: true, // To avoid duplicates if the seeding is rerun
+        //       });
+        //     });
+        console.log(`Inserted ${friendsArr.length} records`);
+        friendsArr.length = 0;
+        set.clear();
+        //   } catch (error) {
+        //     console.error("Unable to create batch:", error);
+        //   }
+        // }
+      }
+      // DELETE THE 2 USERS WITHOUT FRIENDS AFTER SEEDED?
+    }
+    // remaining records
   }
-  console.log(friendsArr.length);
+  if (friendsArr.length > 0) {
+    // try {
+    //   await prisma.$transaction(async (prisma) => {
+    //     await prisma.user_friend.createMany({
+    //       data: friendsArr,
+    //       skipDuplicates: true, // To avoid duplicates if the seeding is rerun
+    //     });
+    //   });
+    console.log(`Inserted ${friendsArr.length} records`);
+    // } catch (error) {
+    //   console.error("Unable to create batch:", error);
+    // }
+  }
 }
+
 processCSV()
   .then(async () => {
     await prisma.$disconnect();

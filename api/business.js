@@ -35,6 +35,7 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
+// Get a list of businesses with a given category_id
 // GET /api/business/category/:category_id
 business_router.get("/category/:category_id", async (req, res, next) => {
   try {
@@ -67,4 +68,11 @@ business_router.get("/category/:category_id", async (req, res, next) => {
     });
   }
 });
+
+business_router.get("/:business_id/reviews"),
+  async (req, res, next) => {
+    // LOOK AT CAPSTONE API FOLDER FOR
+    // REQUEST PARAMETERS WITH LIMIT AND INDEX
+  };
+
 module.exports = business_router;
