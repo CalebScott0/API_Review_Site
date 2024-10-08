@@ -59,10 +59,10 @@ model user {
 }
 
 model user_friend {
-  user_id    String
-  friend_id  String
+  user_id       String
+  friend_id     String
   // this will help with notifications
-  created_at DateTime @default(now())
+  friends_since DateTime @default(now())
 
   // CREATED_AT FOR HOW LONG YOU'VE BEEN FRIENDS?
   // WOULD NEED TO SEED RANDOM FOR ALL FRIENDS
@@ -75,11 +75,11 @@ model user_friend {
 }
 
 model user_compliment {
-  id         String          @id @default(uuid())
-  user_id    String
-  type       compliment_type
-  count      Int             @default(0)
-  created_at DateTime        @default(now())
+  id      String          @id @default(uuid())
+  user_id String
+  type    compliment_type
+  count   Int             @default(0)
+  // created_at DateTime        @default(now())
 
   user user @relation(fields: [user_id], references: [id])
 
@@ -160,8 +160,8 @@ enum photo_label {
 
 model tip {
   id         String   @id @default(uuid())
-  created_at DateTime @default(now())
   tip_text   String
+  created_at DateTime @default(now())
 
   author_id   String
   business_id String
