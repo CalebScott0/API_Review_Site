@@ -36,8 +36,8 @@ review_router.post(
         getUserById(author_id),
       ]);
       // user/business is object inside of array, take out object
-      business = business[0];
-      user = user[0];
+      [user, business] = [user[0], business[0]];
+
       // add 1 to business review count
       const new_business_review_count = business.review_count + 1;
       /*
@@ -118,9 +118,7 @@ review_router.put(
           getUserById(author_id),
           getReviewById(review_id),
         ]);
-        user = user[0];
-        review = review[0];
-        business = business[0];
+        [user, review, business] = [user[0], review[0], business[0]];
 
         // stars to reaverage should equal new star rating - original rating
         // example: if original review had 5 stars
@@ -191,9 +189,7 @@ review_router.delete(
         getUserById(author_id),
         getReviewById(review_id),
       ]);
-      user = user[0];
-      review = review[0];
-      business = business[0];
+      [user, review, business] = [user[0], review[0], business[0]];
 
       const new_business_review_count = business.review_count - 1;
       // stars is negative as we are deleting
