@@ -61,7 +61,6 @@ model user {
 model user_friend {
   user_id       String
   friend_id     String
-  // this will help with notifications
   friends_since DateTime @default(now())
 
   // CREATED_AT FOR HOW LONG YOU'VE BEEN FRIENDS?
