@@ -82,6 +82,8 @@ model user_compliment {
   created_at DateTime        @default(now())
 
   user user @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
 }
 
 enum compliment_type {
@@ -176,8 +178,8 @@ model business_hours {
   id          String   @id @default(uuid())
   business_id String
   day_of_week String
-  open_time   DateTime @db.Time(2)
-  close_time  DateTime @db.Time(2)
+  open_time   DateTime @db.Time()
+  close_time  DateTime @db.Time()
 
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
