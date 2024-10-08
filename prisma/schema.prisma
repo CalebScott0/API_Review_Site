@@ -30,8 +30,8 @@ model business {
   reviews             review[]
   photos              photo_business[]
   tips                tip[]
-  business_hours      business_hours?
-  business_attributes business_attributes?
+  business_hours      business_hours[]
+  business_attributes business_attributes[]
 }
 
 model user {
@@ -51,15 +51,18 @@ model user {
   // fans = # of fans a user has (different than friends, fans only follow your account?)
   fans          Int      @default(0)
 
-  reviews     review[]
-  tips        tip[]
-  user_friend user_friend[] @relation("User_Friend_Relation")
-  friends     user_friend[]
+  reviews          review[]
+  tips             tip[]
+  user_friend      user_friend[]     @relation("User_Friend_Relation")
+  friends          user_friend[]
+  user_compliments user_compliment[]
 }
 
 model user_friend {
-  user_id   String
-  friend_id String
+  user_id    String
+  friend_id  String
+  // this will help with notifications
+  created_at DateTime @default(now())
 
   // CREATED_AT FOR HOW LONG YOU'VE BEEN FRIENDS?
   // WOULD NEED TO SEED RANDOM FOR ALL FRIENDS
@@ -69,6 +72,30 @@ model user_friend {
 
   @@id([user_id, friend_id])
   @@index([user_id])
+}
+
+model user_compliment {
+  id         String          @id @default(uuid())
+  user_id    String
+  type       compliment_type
+  count      Int             @default(0)
+  created_at DateTime        @default(now())
+
+  user user @relation(fields: [user_id], references: [id])
+}
+
+enum compliment_type {
+  HOT
+  MORE
+  PROFILE
+  CUTE
+  LIST
+  NOTE
+  PLAIN
+  COOL
+  FUNNY
+  WRITER
+  PHOTOS
 }
 
 model review {
@@ -111,14 +138,22 @@ model category_business {
 }
 
 model photo_business {
-  id      String  @id @default(uuid())
+  id      String      @id @default(uuid())
   caption String?
-  label   String?
+  label   photo_label
 
   business_id String
   business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@index([business_id])
+}
+
+enum photo_label {
+  drink
+  food
+  inside
+  menu
+  outside
 }
 
 model tip {
@@ -138,16 +173,15 @@ model tip {
 }
 
 model business_hours {
-  business_id String  @id
-  monday      String?
-  tuesday     String?
-  wednesday   String?
-  thursday    String?
-  friday      String?
-  saturday    String?
-  sunday      String?
+  id          String   @id @default(uuid())
+  business_id String
+  day_of_week String
+  open_time   DateTime @db.Time(2)
+  close_time  DateTime @db.Time(2)
 
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@index([business_id])
 }
 
 // split this later into attribute categories, do this the same way as categories! (Many to Many relationship!)

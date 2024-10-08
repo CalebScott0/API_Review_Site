@@ -6,67 +6,68 @@ const prisma = new PrismaClient({
   log: ["info"],
 });
 
-let friendsArr = [];
-let set = new Set();
+const days = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
+
+function isValidTime(timeStr) {
+  const timePattern = /^([0-1]?\d|2[0-3]):[0-5]\d$/; // Matches h:mm and hh:mm formats
+  return timePattern.test(timeStr);
+}
+function formatTime(timeStr) {
+  const [hour, minute] = timeStr.split(":");
+  const formattedHour = hour.padStart(2, "0"); // Ensures the hour has at least 2 digits
+  return `${formattedHour}:${minute}`;
+}
+
+const records = [];
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
     .createReadStream(
-      "/Users/cbs062/Desktop/Review_Site_CSV_Files/user_friends.csv"
+      "/Users/cbs062/Desktop/Review_Site_CSV_Files/business_hours.csv"
     )
     .pipe(parse({ from_line: 2 }));
   for await (const record of parser) {
-    const user_id = record[0];
-    const user_friends = record[1].split(", ");
-    for (const friend_id of user_friends) {
-      const pair = `${user_id}-${friend_id}`;
-      const friendExists = await prisma.user.findUnique({
-        where: { id: friend_id },
-      });
-      if (!friendExists) {
-        // console.error(`Friend with ID ${friend_id} does not exist.`);
-        continue; // Skip this friend if they don't exist
-      }
-      if (!set.has(pair)) {
-        set.add(pair);
-        friendsArr.push({ user_id, friend_id });
-      }
-      if (friendsArr.length === 1000) {
-        (async () => {
-          try {
-            await prisma.$transaction(async (prisma) => {
-              await prisma.user_friend.createMany({
-                data: friendsArr,
-                skipDuplicates: true, // To avoid duplicates if the seeding is rerun
-              });
-            });
-            console.log(`Inserted ${friendsArr.length} records :)`);
-            friendsArr.length = 0;
-            set.clear();
-          } catch (error) {
-            console.error("Unable to create batch:", error);
-          }
-        })();
-      }
-    }
-    // - 2 USERS W/O FRIENDS ARE THE TEST USERS - delete
-  }
-  // remaining records
-  if (friendsArr.length > 0) {
-    (async () => {
-      try {
-        await prisma.$transaction(async (prisma) => {
-          await prisma.user_friend.createMany({
-            data: friendsArr,
-            skipDuplicates: true, // To avoid duplicates if the seeding is rerun
-          });
+    const business_id = record[0];
+    const hours = record.slice(1);
+
+    // go through each day of the week
+    // monday - sunday = index 0-6 of hours
+    days.forEach((day, idx) => {
+      // split each hour record into open/close time
+      let [open_time, close_time] = hours[idx].split("-");
+      if (isValidTime(open_time) && isValidTime(close_time)) {
+        open_time = formatTime(open_time);
+        close_time = formatTime(close_time);
+        records.push({
+          business_id,
+          day_of_week: day,
+          open_time: new Date(`1970-01-01T${open_time}:00Z`),
+          close_time: new Date(`1970-01-01T${close_time}:00Z`),
         });
-        console.log(`Inserted ${friendsArr.length} records, done!`);
-      } catch (error) {
-        console.error("Unable to create batch:", error);
       }
-    })();
+    });
   }
+  console.log("creating records");
+  while (records.length) {
+    let batch = records.splice(0, 1000);
+    (async () => {
+      await prisma.business_hours.createMany({
+        data: batch,
+        skipDuplicates: true,
+      });
+    })();
+    console.log(`${batch.length} records created`);
+  }
+  console.log(records);
+  return;
 }
 
 processCSV()
