@@ -23,27 +23,34 @@ const prisma = new PrismaClient({
       stars: true, // Count the total number of reviews
     },
   });
-  for (let i = 0; i < user_stats.length; i++) {
-    await prisma.user.update({
-      where: {
-        id: user_stats[i].author_id,
-      },
-      data: {
-        average_stars: +user_stats[i]._avg.stars.toFixed(2),
-        review_count: user_stats[i]._count.stars,
-      },
-    });
 
-    i !== 0 &&
-      console.log(
-        `Updated users # ${i} / ${users.length} - ${(
-          (i / users.length) *
-          100
-        ).toFixed(2)}%...`
-      );
+  const BATCH_SIZE = 100;
+
+  for (let i = 0; i < user_stats.length; i += BATCH_SIZE) {
+    // create array of update promises
+    const update_batch = user_stats.slice(i, i + BATCH_SIZE).map((user) =>
+      prisma.user.update({
+        where: {
+          id: user.author_id,
+        },
+        data: {
+          average_stars: +user._avg.stars.toFixed(2),
+          review_count: user._count.stars,
+        },
+      })
+    );
+
+    await Promise.all(update_batch);
+
+    console.log(
+      `Updated users # ${i} / ${users.length} - ${(
+        (i / users.length) *
+        100
+      ).toFixed(2)}%...`
+    );
   }
 
-  console.log("Users updated");
+  console.log("Users Update Complete");
 })()
   .then(async () => {
     await prisma.$disconnect();

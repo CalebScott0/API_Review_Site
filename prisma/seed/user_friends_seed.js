@@ -9,7 +9,7 @@ const prisma = new PrismaClient({
 
 let friendsArr = [];
 let count = 0;
-// let set = new Set();
+let set = new Set();
 
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
@@ -41,7 +41,7 @@ async function processCSV() {
         }
       }
 
-      const BATCH_SIZE = 1000;
+      const BATCH_SIZE = 10;
       if (friendsArr.length === BATCH_SIZE) {
         try {
           await prisma.user_friend

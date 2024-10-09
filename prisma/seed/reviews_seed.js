@@ -6,7 +6,6 @@ const prisma = new PrismaClient({
   log: ["info"],
 });
 
-let parse_count = 0;
 let records = [];
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
@@ -15,7 +14,6 @@ async function processCSV() {
     .pipe(parse({ from_line: 2 }));
 
   console.log("Parsing records...");
-  let count = 0;
 
   for await (const record of parser) {
     records.push({
@@ -47,7 +45,6 @@ async function processCSV() {
         .then(() => console.log(`${count} reviews created`));
     }
   }
-
   if (records.length > 0) {
     (async () => {
       try {

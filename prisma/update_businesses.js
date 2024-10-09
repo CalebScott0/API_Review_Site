@@ -2,9 +2,6 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient({
   log: ["info"],
 });
-const roundHalf = (num) => {
-  return Math.round(num * 2) / 2;
-};
 
 (async function () {
   const businesses = await prisma.business.findMany({
@@ -25,37 +22,32 @@ const roundHalf = (num) => {
       stars: true, // Count the total number of reviews
     },
   });
-  for (let i = 0; i < business_stats.length; i++) {
-    // let average_stars = await averageBusinessStars(businesses[i].id);
+  const BATCH_SIZE = 100;
 
-    // let review_count = await countBusinessReviews(businesses[i].id);
-    await prisma.business.update({
-      where: {
-        id: business_stats[i].business_id,
-      },
-      data: {
-        average_stars: +business_stats[i]._avg.stars.toFixed(2),
-        review_count: business_stats[i]._count.stars,
-      },
-    });
-    // await prisma.business.update({
-    //   where: { id: businesses[i].id },
-    //   data: {
-    //     average_stars,
-    //     review_count,
-    //   },
-    // });
-
-    i !== 0 &&
-      console.log(
-        `Updated business # ${i} / ${businesses.length} - ${(
-          (i / businesses.length) *
-          100
-        ).toFixed(2)}%...`
+  for (let i = 0; i < business_stats.length; i += BATCH_SIZE) {
+    // create array of business promises
+    const update_batch = business_stats
+      .slice(i, i + BATCH_SIZE)
+      .map((business) =>
+        prisma.business.update({
+          where: {
+            id: business.business_id,
+          },
+          data: {
+            average_stars: +business._avg.stars.toFixed(2),
+            review_count: business._count.stars,
+          },
+        })
       );
+    await Promise.all(update_batch);
+    console.log(
+      `Updated business # ${i} / ${business_stats.length} - ${(
+        (i / businesses.length) *
+        100
+      ).toFixed(2)}%...`
+    );
   }
-
-  console.log("Businesses updated");
+  console.log("Business Update Complete");
 })()
   .then(async () => {
     await prisma.$disconnect();
