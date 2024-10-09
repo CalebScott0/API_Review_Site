@@ -150,11 +150,11 @@ model photo_business {
 }
 
 enum photo_label {
-  drink
-  food
-  inside
-  menu
-  outside
+  DRINK
+  FOOD
+  INSIDE
+  MENU
+  OUTSIDE
 }
 
 model tip {

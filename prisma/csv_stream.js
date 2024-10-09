@@ -31,7 +31,7 @@ async function processCSV() {
         set.add(pair);
         friendsArr.push({ user_id, friend_id });
       }
-      if (friendsArr.length === 1000) {
+      if (friendsArr.length === 10000) {
         (async () => {
           try {
             await prisma.$transaction(async (prisma) => {
