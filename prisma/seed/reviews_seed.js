@@ -15,7 +15,7 @@ async function processCSV() {
     .pipe(parse({ from_line: 2 }));
 
   console.log("Parsing records...");
-  let parse_count = 0;
+  let count = 0;
 
   for await (const record of parser) {
     records.push({
@@ -30,29 +30,37 @@ async function processCSV() {
       created_at: new Date(record[9]),
       updated_at: new Date(record[10]),
     });
-    parse_count++;
-    if (parse_count % 10000 === 0) console.log(parse_count);
+    const BATCH_SIZE = 10;
+
+    if (records.length === BATCH_SIZE) {
+      (async () => {
+        try {
+          await prisma.review.createMany({
+            data: [...records.splice(0, records.length)],
+            skipDuplicates: true,
+          });
+        } catch (error) {
+          console.log(error);
+        }
+      })()
+        .then(() => (count += BATCH_SIZE))
+        .then(() => console.log(`${count} reviews created`));
+    }
   }
 
-  const total = records.length;
-  console.log("Creating records..");
-
-  while (records.length) {
-    const batch = records.splice(0, 100);
+  if (records.length > 0) {
     (async () => {
       try {
         await prisma.review.createMany({
-          data: batch,
+          data: records,
           skipDuplicates: true,
         });
       } catch (error) {
         console.log(error);
       }
     })()
-      .then(() => (parse_count += batch.length))
-      .then(() =>
-        console.log(`${parse_count} records attempted to create / ${total}`)
-      );
+      .then(() => (count += BATCH_SIZE))
+      .then(() => console.log(`${count} reviews created`));
   }
 }
 

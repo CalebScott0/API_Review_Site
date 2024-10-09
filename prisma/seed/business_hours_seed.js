@@ -74,7 +74,7 @@ async function processCSV() {
     })()
       .then(() => (count += batch.length))
       .then(() =>
-        console.log(`${count} records attempted to create / ${total}`)
+        console.log(`${count} business hour records created / ${total}`)
       );
   }
 }

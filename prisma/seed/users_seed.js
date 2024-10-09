@@ -45,9 +45,7 @@ async function processCSV() {
       }
     })()
       .then(() => (count += batch.length))
-      .then(() =>
-        console.log(`${count} records attempted to create / ${total}`)
-      );
+      .then(() => console.log(`${count} users created / ${total}`));
   }
 }
 
