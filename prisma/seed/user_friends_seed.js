@@ -1,7 +1,6 @@
 const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 const { parse } = require("csv-parse");
-const { faker } = require("@faker-js/faker");
 
 const prisma = new PrismaClient({
   log: ["info"],
@@ -9,7 +8,7 @@ const prisma = new PrismaClient({
 
 let friendsArr = [];
 let count = 0;
-let set = new Set();
+// let set = new Set();
 
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
@@ -27,21 +26,24 @@ async function processCSV() {
     for (const friend_id of user_friends) {
       // add all unique user ids to the set
       // avoid millions of user find unique calls
-      if (!set.has(user_id)) {
-        const friend_exists = await prisma.user.findUnique({
-          where: { id: friend_id },
+      // if (!set.has(friend_id)) {
+      const friend_exists = await prisma.user.findUnique({
+        where: { id: friend_id },
+      });
+
+      if (!friend_exists) {
+        continue;
+        // Skip this friend if they don't exist
+      } else {
+        // set.add(friend_id);
+        friendsArr.push({
+          user_id,
+          friend_id,
         });
-
-        if (!friend_exists) {
-          continue;
-          // Skip this friend if they don't exist
-        } else {
-          set.add(user_id);
-          friendsArr.push({ user_id, friend_id });
-        }
       }
+      // }
 
-      const BATCH_SIZE = 10;
+      const BATCH_SIZE = 100;
       if (friendsArr.length === BATCH_SIZE) {
         try {
           await prisma.user_friend

@@ -44,6 +44,7 @@ model user {
   average_stars Float    @default(0.0)
   review_count  Int      @default(0)
   user_since    DateTime @default(now())
+  updated_at    DateTime @default(now())
   // useful, funny, and cool are the total of votes sent by the user to other reviews
   useful        Int      @default(0)
   funny         Int      @default(0)
