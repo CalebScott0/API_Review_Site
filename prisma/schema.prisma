@@ -216,8 +216,8 @@ model ambience {
   business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [id])
 }
 
-enum ambience_enum {
-}
+// enum ambience_enum {
+// }
 
 // WRITE ENUMS HERE
 
