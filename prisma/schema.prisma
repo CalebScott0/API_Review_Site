@@ -188,21 +188,20 @@ model business_hours {
 enum alcohol_enum {
   FULL_BAR
   BEER_AND_WINE
-  // NONE?
+  NONE
 }
 
 enum byob_corkage_enum {
   YES_CORKAGE
   YES_FREE
-  // NONE?
+  NONE
 }
 
 model business_attributes {
   id                String             @id @default(uuid())
   businessId        String             @unique
-  accepts_insurance Boolean? //or required but default to false?
-  alcohol           alcohol_enum? // or required and include none in enum?
-  // - might be better practice to not include none in enums!
+  accepts_insurance Boolean?
+  alcohol           alcohol_enum?
   byob              Boolean?
   byob_corkage      byob_corkage_enum?
 

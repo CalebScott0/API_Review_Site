@@ -49,29 +49,11 @@ async function processCSV() {
     "WRITER",
   ];
 
-  const BATCH_SIZE = 1000;
+  // const BATCH_SIZE = 1000;
 
   for await (const record of parser) {
-    // complimentsArr.push(record);
-    complimentsArr.push({
-      id: record[0],
-      user_id: record[1],
-      type: record[2],
-      count: +record[3],
-    });
-    if (complimentsArr.length === BATCH_SIZE) {
-      try {
-        await prisma.user_compliment.createMany({
-          data: [...complimentsArr.splice(0, complimentsArr.length)],
-          skipDuplicates: true,
-        });
-      } catch (error) {
-        console.log(error);
-      }
-      console.log(`${(count += BATCH_SIZE)} records created`);
-    }
+    complimentsArr.push(record);
   }
-  return;
   // flatMap to return one array instead of array of nested arrays
   records = complimentsArr.flatMap((user) => {
     //user_id is the first index of each nested user array - rest of the indexes are counts of compliments
