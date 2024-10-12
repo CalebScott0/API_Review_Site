@@ -30,7 +30,7 @@ const getReviewById = (id) => {
 
 // default limit 1 to return most recent
 const getReviewsForBusiness = ({ business_id, limit = 1, offset = 0 }) => {
-  return prisma.$queryRaw`SELECT r.id, u.username AS author_username, r.author_id,
+  return prisma.$queryRaw`SELECT r.id, CONCAT(u.first_name, u.last_name) as author_name, r.author_id,
                           r.business_id, r.stars, r.review_text,
                           r.useful, r.funny, r.cool, r.created_at, r.updated_at
                           FROM review r
@@ -41,7 +41,7 @@ const getReviewsForBusiness = ({ business_id, limit = 1, offset = 0 }) => {
 };
 
 const getReviewsForUser = ({ author_id, limit = 10, offset = 0 }) => {
-  return prisma.$queryRaw`SELECT r.id, u.username AS author_username, r.author_id,
+  return prisma.$queryRaw`SELECT r.id, CONCAT(u.first_name, u.last_name) as author_name, r.author_id,
                           r.business_id, r.stars, r.review_text,
                           r.useful, r.funny, r.cool, r.created_at, r.updated_at
                           FROM review r

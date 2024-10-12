@@ -49,7 +49,7 @@ async function processCSV() {
     "WRITER",
   ];
 
-  const BATCH_SIZE = 100;
+  const BATCH_SIZE = 1000;
 
   for await (const record of parser) {
     // complimentsArr.push(record);

@@ -9,10 +9,6 @@ const getUserById = (id) => {
                         WHERE id = ${id}`;
 };
 
-const getUserByUsername = (username) => {
-  return prisma.$queryRaw`SELECT * FROM "user"
-                        WHERE username = ${username}`;
-};
 const getUserByEmail = (email) => {
   return prisma.$queryRaw`SELECT * FROM "user"
                         WHERE email = ${email}`;
@@ -29,6 +25,5 @@ module.exports = {
   createUser,
   getUserByEmail,
   getUserById,
-  getUserByUsername,
   updateUser,
 };

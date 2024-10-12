@@ -36,7 +36,6 @@ model business {
 
 model user {
   id            String   @id @default(uuid())
-  username      String   @unique
   password      String
   first_name    String?
   last_name     String?
@@ -74,19 +73,7 @@ model user_friend {
   @@index([user_id])
 }
 
-model user_compliment {
-  id      String          @id @default(uuid())
-  user_id String
-  type    compliment_type
-  count   Int             @default(0)
-  // created_at DateTime        @default(now())
-
-  user user @relation(fields: [user_id], references: [id])
-
-  @@index([user_id])
-}
-
-enum compliment_type {
+enum compliment_type_enum {
   HOT
   MORE
   PROFILE
@@ -98,6 +85,18 @@ enum compliment_type {
   FUNNY
   WRITER
   PHOTOS
+}
+
+model user_compliment {
+  id      String               @id @default(uuid())
+  user_id String
+  type    compliment_type_enum
+  count   Int                  @default(0)
+  // created_at DateTime        @default(now())
+
+  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
 }
 
 model review {
@@ -139,23 +138,23 @@ model category_business {
   @@index([business_id])
 }
 
-model photo_business {
-  id      String      @id @default(uuid())
-  caption String?
-  label   photo_label
-
-  business_id String
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  @@index([business_id])
-}
-
-enum photo_label {
+enum photo_label_enum {
   DRINK
   FOOD
   INSIDE
   MENU
   OUTSIDE
+}
+
+model photo_business {
+  id      String           @id @default(uuid())
+  caption String?
+  label   photo_label_enum
+
+  business_id String
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@index([business_id])
 }
 
 model tip {
@@ -186,45 +185,80 @@ model business_hours {
   @@index([business_id])
 }
 
-// split this later into attribute categories, do this the same way as categories! (Many to Many relationship!)
-model business_attributes {
-  business_id String @id
-
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  accepts_insurance             String?
-  alcohol                       String?
-  ambience                      String?
-  byob                          String?
-  byob_corkage                  String?
-  best_nights                   String?
-  bike_parking                  String?
-  business_accepts_bitcoin      String?
-  business_accepts_credit_cards String?
-  business_parking              String?
-  by_appointment_only           String?
-  caters                        String?
-  coat_check                    String?
-  corkage                       String?
-  dogs_allowed                  String?
-  drive_thru                    String?
-  good_for_dancing              String?
-  good_for_kids                 String?
-  good_for_meal                 String?
-  hair_speciality               String?
-  happy_hour                    String?
-  has_tv                        String?
-  music                         String?
-  noise_level                   String?
-  outdooor_seating              String?
-  restaurant_attire             String?
-  restaurant_delivery           String?
-  restaurant_good_for_groups    String?
-  restaurant_price_range        String?
-  restaurant_reservations       String?
-  restaurant_table_service      String?
-  restaurant_take_out           String?
-  smoking                       String?
-  wheelchair_accessible         String?
-  wifi                          String?
+enum alcohol_enum {
+  FULL_BAR
+  BEER_AND_WINE
+  // NONE?
 }
+
+enum byob_corkage_enum {
+  YES_CORKAGE
+  YES_FREE
+  // NONE?
+}
+
+model business_attributes {
+  id                String             @id @default(uuid())
+  businessId        String             @unique
+  accepts_insurance Boolean? //or required but default to false?
+  alcohol           alcohol_enum? // or required and include none in enum?
+  // - might be better practice to not include none in enums!
+  byob              Boolean?
+  byob_corkage      byob_corkage_enum?
+
+  business business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  ambience ambience[]
+}
+
+model ambience {
+  id                    String              @id @default(uuid())
+  business_attribute_id String
+  business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [id])
+}
+
+enum ambience_enum {
+}
+
+// WRITE ENUMS HERE
+
+// model business_attributes {
+//   business_id String @id
+
+//   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+//   accepts_insurance             String?
+//   alcohol                       String?
+//   ambience                      String?
+//   byob                          String?
+//   byob_corkage                  String?
+//   best_nights                   String?
+//   bike_parking                  String?
+//   business_accepts_bitcoin      String?
+//   business_accepts_credit_cards String?
+//   business_parking              String?
+//   by_appointment_only           String?
+//   caters                        String?
+//   coat_check                    String?
+//   corkage                       String?
+//   dogs_allowed                  String?
+//   drive_thru                    String?
+//   good_for_dancing              String?
+//   good_for_kids                 String?
+//   good_for_meal                 String?
+//   hair_speciality               String?
+//   happy_hour                    String?
+//   has_tv                        String?
+//   music                         String?
+//   noise_level                   String?
+//   outdooor_seating              String?
+//   restaurant_attire             String?
+//   restaurant_delivery           String?
+//   restaurant_good_for_groups    String?
+//   restaurant_price_range        String?
+//   restaurant_reservations       String?
+//   restaurant_table_service      String?
+//   restaurant_take_out           String?
+//   smoking                       String?
+//   wheelchair_accessible         String?
+//   wifi                          String?
+// }

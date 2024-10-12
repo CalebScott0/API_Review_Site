@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { createUser, getUserByUsername } = require("../../db/user");
+const { createUser, getUserByEmail } = require("../../db/user");
 const { checkUserData, checkUserExists } = require("./utils");
 
 const auth_router = express.Router();
@@ -38,16 +38,18 @@ auth_router.post(
 // POST /api/auth/login
 auth_router.post("/login", checkUserData, async (req, res, next) => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    // find user by username
-    const user = (await getUserByUsername(username))[0];
+    // find user by email
+    const user = (await getUserByEmail(email))[0];
+
     // check if user exists
     if (!user) {
       return res.status(401).send({ message: "Account does not exist" });
     }
     // run bcrypt if login was NOT via OAuth
     const is_same_pass = await bcrypt.compare(password, user?.password);
+
     if (!is_same_pass) {
       return res.status(401).send({ message: "Invalid login credentials" });
     }
