@@ -73,7 +73,7 @@ model user_friend {
   @@index([user_id])
 }
 
-enum compliment_type_enum {
+enum compliment_type {
   HOT
   MORE
   PROFILE
@@ -88,10 +88,10 @@ enum compliment_type_enum {
 }
 
 model user_compliment {
-  id      String               @id @default(uuid())
+  id      String          @id @default(uuid())
   user_id String
-  type    compliment_type_enum
-  count   Int                  @default(0)
+  type    compliment_type
+  count   Int             @default(0)
   // created_at DateTime        @default(now())
 
   user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -138,7 +138,7 @@ model category_business {
   @@index([business_id])
 }
 
-enum photo_label_enum {
+enum photo_label_type {
   DRINK
   FOOD
   INSIDE
@@ -149,7 +149,7 @@ enum photo_label_enum {
 model photo_business {
   id      String           @id @default(uuid())
   caption String?
-  label   photo_label_enum
+  label   photo_label_type
 
   business_id String
   business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
@@ -185,13 +185,13 @@ model business_hours {
   @@index([business_id])
 }
 
-enum alcohol_enum {
+enum alcohol_type {
   FULL_BAR
   BEER_AND_WINE
   NONE
 }
 
-enum byob_corkage_enum {
+enum byob_corkage_type {
   YES_CORKAGE
   YES_FREE
   NONE
@@ -199,24 +199,40 @@ enum byob_corkage_enum {
 
 model business_attributes {
   id                String             @id @default(uuid())
-  businessId        String             @unique
+  business_id       String             @unique
   accepts_insurance Boolean?
-  alcohol           alcohol_enum?
+  alcohol           alcohol_type?
   byob              Boolean?
-  byob_corkage      byob_corkage_enum?
+  byob_corkage      byob_corkage_type?
 
-  business business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  ambience ambience[]
+  business business  @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  ambience ambience?
+
+  @@index([business_id])
+}
+
+enum ambience_type {
+  TOURISTY
+  HIPSTER
+  ROMANTIC
+  DIVEY
+  INTIMATE
+  TRENDY
+  UPSCALE
+  CLASSY
+  CASUAL
 }
 
 model ambience {
-  id                    String              @id @default(uuid())
-  business_attribute_id String
-  business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [id])
-}
+  id                    String        @id @default(uuid())
+  business_attribute_id String        @unique
+  type                  ambience_type
+  value                 Boolean
 
-// enum ambience_enum {
-// }
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [id], onDelete: Cascade)
+
+  @@index([business_attribute_id])
+}
 
 // WRITE ENUMS HERE
 
