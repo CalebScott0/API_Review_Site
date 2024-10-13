@@ -96,6 +96,7 @@ model user_compliment {
 
   user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  // @@unique([user_id, type])
   @@index([user_id])
 }
 
@@ -173,15 +174,26 @@ model tip {
   @@index([business_id, created_at])
 }
 
+enum day_of_week {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
 model business_hours {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   business_id String
-  day_of_week String
-  open_time   DateTime @db.Time()
-  close_time  DateTime @db.Time()
+  day_of_week day_of_week
+  open_time   DateTime    @db.Time()
+  close_time  DateTime    @db.Time()
 
   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
+  @@unique([business_id, day_of_week])
   @@index([business_id])
 }
 
@@ -198,15 +210,18 @@ enum byob_corkage_type {
 }
 
 model business_attributes {
-  id                String             @id @default(uuid())
-  business_id       String             @unique
-  accepts_insurance Boolean?
-  alcohol           alcohol_type?
-  byob              Boolean?
-  byob_corkage      byob_corkage_type?
+  business_id                   String                 @unique
+  accepts_insurance             Boolean?
+  alcohol                       alcohol_type?
+  ambience                      attribute_ambience?
+  best_nights                   attribute_best_nights?
+  bike_parking                  Boolean?
+  business_accepts_bitcoin      Boolean?
+  business_accepts_credit_cards Boolean?
+  byob                          Boolean?
+  byob_corkage                  byob_corkage_type?
 
-  business business  @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  ambience ambience?
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@index([business_id])
 }
@@ -223,18 +238,24 @@ enum ambience_type {
   CASUAL
 }
 
-model ambience {
-  id                    String        @id @default(uuid())
+model attribute_ambience {
   business_attribute_id String        @unique
   type                  ambience_type
   value                 Boolean
 
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [id], onDelete: Cascade)
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
 
   @@index([business_attribute_id])
 }
 
-// WRITE ENUMS HERE
+model attribute_best_nights {
+  business_attribute_id String      @unique
+  // use enum of days of week already created
+  day_of_week           day_of_week
+  value                 Boolean
+
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+}
 
 // model business_attributes {
 //   business_id String @id
