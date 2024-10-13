@@ -197,6 +197,8 @@ model business_hours {
   @@index([business_id])
 }
 
+// enums for business attribute fields with singular values
+
 enum alcohol_type {
   BEER_AND_WINE
   FULL_BAR
@@ -209,33 +211,80 @@ enum byob_corkage_type {
   NONE
 }
 
-model business_attributes {
-  business_id          String                   @unique
-  accepts_insurance    Boolean?
-  accepts_bitcoin      Boolean?
-  accepts_credit_cards Boolean?
-  alcohol              alcohol_type?
-  ambience             attribute_ambience?
-  best_nights          attribute_best_nights?
-  bike_parking         Boolean?
-  by_appointment_only  Boolean?
-  byob                 Boolean?
-  byob_corkage         byob_corkage_type?
-  cates                Boolean?
-  coat_check           Boolean?
-  corkage              Boolean?
-  dogs_allowed         Boolean?
-  drive_thru           Boolean?
-  good_for_dancing     Boolean?
-  good_for_kids        Boolean?
-  good_for_meal        attribute_good_for_meal?
-  parking_type         attribute_parking_type?
+enum noise_level_type {
+  AVERAGE
+  LOUD
+  QUIET
+  VERY_LOUD
+  NONE
+}
 
-  business                  business                   @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  attribute_hair_speciality attribute_hair_speciality?
+enum restaurant_attire_type {
+  CASUAL
+  DRESSY
+  FORMAL
+  NONE
+}
+
+enum smoking_type {
+  NO
+  OUTDOOR
+  YES
+  NONE
+}
+
+enum wifi_type {
+  FREE
+  NO
+  PAID
+  NONE
+}
+
+model business_attributes {
+  business_id                   String                      @unique
+  accepts_insurance             Boolean?
+  alcohol                       alcohol_type?
+  ambience                      attribute_ambience?
+  best_nights                   attribute_best_nights?
+  bike_parking                  Boolean?
+  business_accepts_bitcoin      Boolean?
+  business_accepts_credit_cards Boolean?
+  business_parking              attribute_business_parking?
+  by_appointment_only           Boolean?
+  byob                          Boolean?
+  byob_corkage                  byob_corkage_type?
+  caters                        Boolean?
+  coat_check                    Boolean?
+  corkage                       Boolean?
+  dogs_allowed                  Boolean?
+  drive_thru                    Boolean?
+  good_for_dancing              Boolean?
+  good_for_kids                 Boolean?
+  good_for_meal                 attribute_good_for_meal?
+  hair_speciality               attribute_hair_speciality?
+  happy_hour                    Boolean?
+  has_tv                        Boolean?
+  music                         attribute_music?
+  noise_level                   noise_level_type?
+  outdoor_seating               Boolean?
+  restaurant_attire             restaurant_attire_type?
+  restaurant_delivery           Boolean?
+  restaurant_good_for_groups    Boolean?
+  // int 1 - 4 representing price range
+  restaurant_price_range        Int?
+  restaurant_reservations       Boolean?
+  restaurant_table_service      Boolean?
+  restaurant_take_out           Boolean?
+  smoking                       smoking_type?
+  wheelchair_accessible         Boolean?
+  wifi                          wifi_type?
+
+  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@index([business_id])
 }
+
+// fields from business attributes that will be parsed from json structures
 
 enum ambience_type {
   TOURISTY
@@ -263,6 +312,24 @@ model attribute_best_nights {
   business_attribute_id String      @unique
   // use enum of days of week already created
   day_of_week           day_of_week
+  value                 Boolean
+
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@index([business_attribute_id])
+}
+
+enum business_parking_type {
+  GARAGE
+  LOT
+  STREET
+  VALET
+  VALIDATED
+}
+
+model attribute_business_parking {
+  business_attribute_id String                @unique
+  type                  business_parking_type
   value                 Boolean
 
   business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
@@ -310,17 +377,19 @@ model attribute_hair_speciality {
   @@index([business_attribute_id])
 }
 
-enum parking_type {
-  GARAGE
-  LOT
-  STREET
-  VALET
-  VALIDATED
+enum music_type {
+  BACKGROUND_MUSIC
+  DJ
+  JUKEBOX
+  KARAOKE
+  LIVE
+  NO_MUSIC
+  VIDEO
 }
 
-model attribute_parking_type {
-  business_attribute_id String       @unique
-  type                  parking_type
+model attribute_music {
+  business_attribute_id String     @unique
+  type                  music_type
   value                 Boolean
 
   business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
