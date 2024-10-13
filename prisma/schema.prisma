@@ -74,17 +74,17 @@ model user_friend {
 }
 
 enum compliment_type {
-  HOT
-  MORE
-  PROFILE
-  CUTE
-  LIST
-  NOTE
-  PLAIN
   COOL
+  CUTE
   FUNNY
-  WRITER
+  HOT
+  LIST
+  MORE
+  NOTE
   PHOTOS
+  PLAIN
+  PROFILE
+  WRITER
 }
 
 model user_compliment {
@@ -198,8 +198,8 @@ model business_hours {
 }
 
 enum alcohol_type {
-  FULL_BAR
   BEER_AND_WINE
+  FULL_BAR
   NONE
 }
 
@@ -210,18 +210,29 @@ enum byob_corkage_type {
 }
 
 model business_attributes {
-  business_id                   String                 @unique
-  accepts_insurance             Boolean?
-  alcohol                       alcohol_type?
-  ambience                      attribute_ambience?
-  best_nights                   attribute_best_nights?
-  bike_parking                  Boolean?
-  business_accepts_bitcoin      Boolean?
-  business_accepts_credit_cards Boolean?
-  byob                          Boolean?
-  byob_corkage                  byob_corkage_type?
+  business_id          String                   @unique
+  accepts_insurance    Boolean?
+  accepts_bitcoin      Boolean?
+  accepts_credit_cards Boolean?
+  alcohol              alcohol_type?
+  ambience             attribute_ambience?
+  best_nights          attribute_best_nights?
+  bike_parking         Boolean?
+  by_appointment_only  Boolean?
+  byob                 Boolean?
+  byob_corkage         byob_corkage_type?
+  cates                Boolean?
+  coat_check           Boolean?
+  corkage              Boolean?
+  dogs_allowed         Boolean?
+  drive_thru           Boolean?
+  good_for_dancing     Boolean?
+  good_for_kids        Boolean?
+  good_for_meal        attribute_good_for_meal?
+  parking_type         attribute_parking_type?
 
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  business                  business                   @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  attribute_hair_speciality attribute_hair_speciality?
 
   @@index([business_id])
 }
@@ -255,46 +266,100 @@ model attribute_best_nights {
   value                 Boolean
 
   business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@index([business_attribute_id])
 }
 
-// model business_attributes {
-//   business_id String @id
+enum meal_type {
+  BREAKFAST
+  BRUNCH
+  DESSERT
+  DINNER
+  LATENIGHT
+  LUNCH
+}
 
-//   business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+model attribute_good_for_meal {
+  business_attribute_id String    @unique
+  type                  meal_type
+  value                 Boolean
 
-//   accepts_insurance             String?
-//   alcohol                       String?
-//   ambience                      String?
-//   byob                          String?
-//   byob_corkage                  String?
-//   best_nights                   String?
-//   bike_parking                  String?
-//   business_accepts_bitcoin      String?
-//   business_accepts_credit_cards String?
-//   business_parking              String?
-//   by_appointment_only           String?
-//   caters                        String?
-//   coat_check                    String?
-//   corkage                       String?
-//   dogs_allowed                  String?
-//   drive_thru                    String?
-//   good_for_dancing              String?
-//   good_for_kids                 String?
-//   good_for_meal                 String?
-//   hair_speciality               String?
-//   happy_hour                    String?
-//   has_tv                        String?
-//   music                         String?
-//   noise_level                   String?
-//   outdooor_seating              String?
-//   restaurant_attire             String?
-//   restaurant_delivery           String?
-//   restaurant_good_for_groups    String?
-//   restaurant_price_range        String?
-//   restaurant_reservations       String?
-//   restaurant_table_service      String?
-//   restaurant_take_out           String?
-//   smoking                       String?
-//   wheelchair_accessible         String?
-//   wifi                          String?
-// }
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@index([business_attribute_id])
+}
+
+enum hair_speciality_type {
+  AFRICAN_AMERICAN
+  ASIAN
+  COLORING
+  CURLY
+  EXTENSIONS
+  KIDS
+  PERMS
+  STRAIGHT_PERMS
+}
+
+model attribute_hair_speciality {
+  business_attribute_id String               @unique
+  type                  hair_speciality_type
+  value                 Boolean
+
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@index([business_attribute_id])
+}
+
+enum parking_type {
+  GARAGE
+  LOT
+  STREET
+  VALET
+  VALIDATED
+}
+
+model attribute_parking_type {
+  business_attribute_id String       @unique
+  type                  parking_type
+  value                 Boolean
+
+  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@index([business_attribute_id])
+}
+
+//   accepts_insurance             
+//   alcohol                       
+//   ambience                      
+//   byob                          
+//   byob_corkage                  
+//   best_nights                   
+//   bike_parking                  
+//   business_accepts_bitcoin      
+//   business_accepts_credit_cards 
+//   business_parking              
+//   by_appointment_only           
+//   caters                        
+//   coat_check                    
+//   corkage                       
+//   dogs_allowed                  
+//   drive_thru                    
+//   good_for_dancing              
+//   good_for_kids                 
+//   good_for_meal                 
+//   hair_speciality               
+//   happy_hour                    
+//   has_tv                        
+//   music                         
+//   noise_level                   
+//   outdooor_seating              
+//   restaurant_attire             
+//   restaurant_delivery           
+//   restaurant_good_for_groups    
+//   restaurant_price_range        
+//   restaurant_reservations       
+//   restaurant_table_service      
+//   restaurant_take_out           
+//   smoking                       
+//   wheelchair_accessible         
+//   wifi                          
