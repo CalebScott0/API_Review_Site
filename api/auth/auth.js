@@ -14,7 +14,7 @@ auth_router.post(
   async (req, res, next) => {
     try {
       const { password } = req.body;
-
+      console.log(req.body);
       //   hash password
       const HASH_PASS = await bcrypt.hash(password, +process.env.SALT || 7);
 

@@ -43,18 +43,22 @@ async function processAmbienceCSV() {
   }
   const total = records.length;
   const BATCH_SIZE = 100;
-  for (let i = 0; i < total; i += BATCH_SIZE) {
-    const create_batch = records.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < total; i++) {
+    // for (let i = 0; i < total; i += BATCH_SIZE) {
+    // const create_batch = records.slice(i, i + BATCH_SIZE);
     try {
-      await prisma.attribute_ambience.createMany({
-        data: create_batch,
-        skipDuplicates: true,
+      await prisma.attribute_ambience.create({
+        // await prisma.attribute_ambience.createMany({
+        data: records[i],
+        // data: create_batch,
+        // skipDuplicates: true,
       });
-      count += create_batch.length;
+      count++;
+      // count += create_batch.length;
       console.log(`${count} records created / ${total} records`);
     } catch (error) {
-      console.log(error);
-      console.log(records[i]);
+      // console.log(error);
+      // console.log(records[i]);
     }
   }
   ("ambience attribute records seeded");
