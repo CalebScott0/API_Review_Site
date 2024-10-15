@@ -19,8 +19,6 @@ business_router.get("/:id", async (req, res, next) => {
       getBusinessHours(id),
       getCategoriesForBusiness(id),
     ]);
-    console.log(categories.length);
-
     if (categories.length) {
       business = {
         ...business[0],

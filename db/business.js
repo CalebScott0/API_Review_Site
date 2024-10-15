@@ -1,6 +1,6 @@
 const prisma = require("./index");
 
-const getBusinessById = async (id) => {
+const getBusinessById = (id) => {
   return prisma.$queryRaw`SELECT * FROM business
                         WHERE id = ${id}`;
 };
@@ -26,7 +26,7 @@ const updateBusiness = (id, data) => {
 };
 
 const getBusinessHours = (id) => {
-  return prisma.$queryRaw`SELECT monday, tuesday, wednesday, thursday, friday, saturday, sunday FROM business_hours
+  return prisma.$queryRaw`SELECT day_of_week, close_time, open_time from business_hours
                           WHERE business_id = ${id}`;
 };
 
