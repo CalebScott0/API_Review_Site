@@ -227,7 +227,6 @@ enum restaurant_attire_type {
 }
 
 enum smoking_type {
-  NO
   OUTDOOR
   YES
   NONE
