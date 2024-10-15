@@ -9,7 +9,7 @@ const getCategories = () => {
 };
 
 // categories for a specific business
-const getCategoriesForBusiness = (business_id) => {
+const getCategoriesForBusiness = async (business_id) => {
   return prisma.$queryRaw`SELECT c.* FROM category c
                           JOIN category_business cb ON c.id = cb.category_id
                           WHERE cb.business_id = ${business_id}`;

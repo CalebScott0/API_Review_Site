@@ -53,4 +53,7 @@ api_router.use("/auth", require("./auth/auth"));
 // /api/review
 api_router.use("/review", requireUser, require("./review"));
 
+// /api/category
+api_router.use("/category", require("./category"));
+
 module.exports = api_router;

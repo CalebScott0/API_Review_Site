@@ -7,9 +7,10 @@ const { getCategories } = require("../db/category");
 category_router.get("/all_categories", async (req, res, next) => {
   try {
     const categories = await getCategories();
-
     res.send({ categories });
   } catch ({ name, message }) {
     next({ name, message });
   }
 });
+
+module.exports = category_router;

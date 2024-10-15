@@ -22,8 +22,8 @@ business_router.get("/:id", async (req, res, next) => {
     if (categories.length) {
       business = {
         ...business[0],
-        hours: business_hours[0],
-        categories: categories.map((x) => x.name),
+        hours: business_hours,
+        categories,
       };
       // throws error in endpoint
     } else {
@@ -61,7 +61,7 @@ business_router.get("/list/category/:category_id", async (req, res, next) => {
         ]);
         return {
           ...business,
-          hours: business_hours[0],
+          hours: business_hours,
           categories,
           recent_review: review[0],
         };
