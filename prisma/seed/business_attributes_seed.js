@@ -42,7 +42,7 @@ async function processAmbienceCSV() {
     }
   }
   const total = records.length;
-  const BATCH_SIZE = 100;
+  const BATCH_SIZE = 10;
   for (let i = 0; i < total; i += BATCH_SIZE) {
     const create_batch = records.slice(i, i + BATCH_SIZE);
     try {

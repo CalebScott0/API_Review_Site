@@ -38,6 +38,17 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
+// GET /business/all_businesses
+business_router.get("/list/all_businesses", async (req, res, next) => {
+  try {
+    const businesses = await getAllBusinesses();
+
+    res.send({ businesses });
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
+
 // Get a list of businesses with a given category_id
 // GET /api/business/category/:category_id
 business_router.get("/list/category/:category_id", async (req, res, next) => {
