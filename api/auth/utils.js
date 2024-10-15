@@ -2,10 +2,10 @@ const { getUserByEmail } = require("../../db/user");
 
 // check user has provided a username and password in body of request
 const checkUserData = (req, res, next) => {
-  const { username, password } = req.body;
-  if (!username?.length || !password?.length) {
+  const { email, password } = req.body;
+  if (!email?.length || !password?.length) {
     return res.status(400).send({
-      message: "Please provide a username and password",
+      message: "Please provide an email and password",
     });
   }
   next();

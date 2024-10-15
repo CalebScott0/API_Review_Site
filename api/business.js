@@ -42,7 +42,7 @@ business_router.get("/:id", async (req, res, next) => {
 
 // Get a list of businesses with a given category_id
 // GET /api/business/category/:category_id
-business_router.get("/category/:category_id", async (req, res, next) => {
+business_router.get("/list/category/:category_id", async (req, res, next) => {
   try {
     const { category_id } = req.params;
     const { limit, offset } = req.query;
