@@ -235,21 +235,20 @@ enum smoking_type {
 
 enum wifi_type {
   FREE
-  NO
   PAID
   NONE
 }
 
 model business_attributes {
-  business_id                   String                      @unique
+  business_id                   String                       @unique
   accepts_insurance             Boolean?
   alcohol                       alcohol_type?
-  ambience                      attribute_ambience?
-  best_nights                   attribute_best_nights?
+  ambience                      attribute_ambience[]
+  best_nights                   attribute_best_nights[]
   bike_parking                  Boolean?
   business_accepts_bitcoin      Boolean?
   business_accepts_credit_cards Boolean?
-  business_parking              attribute_business_parking?
+  business_parking              attribute_business_parking[]
   by_appointment_only           Boolean?
   byob                          Boolean?
   byob_corkage                  byob_corkage_type?
@@ -260,11 +259,11 @@ model business_attributes {
   drive_thru                    Boolean?
   good_for_dancing              Boolean?
   good_for_kids                 Boolean?
-  good_for_meal                 attribute_good_for_meal?
-  hair_speciality               attribute_hair_speciality?
+  good_for_meal                 attribute_good_for_meal[]
+  hair_speciality               attribute_hair_speciality[]
   happy_hour                    Boolean?
   has_tv                        Boolean?
-  music                         attribute_music?
+  music                         attribute_music[]
   noise_level                   noise_level_type?
   outdoor_seating               Boolean?
   restaurant_attire             restaurant_attire_type?
@@ -299,7 +298,9 @@ enum ambience_type {
 }
 
 model attribute_ambience {
-  business_attribute_id String        @unique
+  id String @id @default(uuid())
+
+  business_attribute_id String
   type                  ambience_type
   value                 Boolean
 
@@ -309,7 +310,9 @@ model attribute_ambience {
 }
 
 model attribute_best_nights {
-  business_attribute_id String      @unique
+  id String @id @default(uuid())
+
+  business_attribute_id String
   // use enum of days of week already created
   day_of_week           day_of_week
   value                 Boolean
@@ -328,7 +331,9 @@ enum business_parking_type {
 }
 
 model attribute_business_parking {
-  business_attribute_id String                @unique
+  id String @id @default(uuid())
+
+  business_attribute_id String
   type                  business_parking_type
   value                 Boolean
 
@@ -347,7 +352,9 @@ enum meal_type {
 }
 
 model attribute_good_for_meal {
-  business_attribute_id String    @unique
+  id String @id @default(uuid())
+
+  business_attribute_id String
   type                  meal_type
   value                 Boolean
 
@@ -368,7 +375,9 @@ enum hair_speciality_type {
 }
 
 model attribute_hair_speciality {
-  business_attribute_id String               @unique
+  id String @id @default(uuid())
+
+  business_attribute_id String
   type                  hair_speciality_type
   value                 Boolean
 
@@ -388,7 +397,9 @@ enum music_type {
 }
 
 model attribute_music {
-  business_attribute_id String     @unique
+  id String @id @default(uuid())
+
+  business_attribute_id String
   type                  music_type
   value                 Boolean
 
