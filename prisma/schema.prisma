@@ -305,6 +305,8 @@ model attribute_ambience {
 
   business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
 
+  // business should only be able to have on of each type in an attribute field
+  @@unique([business_attribute_id, type])
   @@index([business_attribute_id])
 }
 
