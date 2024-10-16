@@ -5,8 +5,8 @@ const {
   getBusinessesByCategory,
   getBusinessById,
   getBusinessHours,
-  getBusinessLocations,
 } = require("../db/business");
+const { getBusinessLocations } = require("../db/location");
 const { getCategoriesForBusiness } = require("../db/category");
 const { getReviewsForBusiness } = require("../db/review");
 const { getPhotosForBusiness } = require("../db/photo");

@@ -39,6 +39,5 @@ module.exports = {
   getBusinessesByCategory,
   getBusinessById,
   getBusinessHours,
-  getBusinessLocations,
   updateBusiness,
 };
