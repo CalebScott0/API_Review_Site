@@ -5,6 +5,7 @@ const prisma = new PrismaClient({
 });
 
 (async () => {
+  // update business location field by creating geo point with latitude and longitude of each business
   await prisma.$queryRaw`UPDATE business
                                set location = ST_SetSRID(ST_MakePoint(latitude, longitude), 4326)`;
   console.log(

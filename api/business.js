@@ -39,7 +39,8 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
-// GET /business/list/businesses_from_location
+// GET /business/list/businesses_from_location -
+// function can take latitude, longitude, and a radius
 business_router.get(
   "/list/businesses_from_location",
   async (req, res, next) => {

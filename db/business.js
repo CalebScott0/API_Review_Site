@@ -6,8 +6,8 @@ const getBusinessById = (id) => {
 };
 
 // default coordinates Indianapolis, IN with default radius 10mi.
-const LATITUDE = "39.7683331";
-const LONGITUDE = "-86.1583502";
+const LATITUDE = 39.7683331;
+const LONGITUDE = -86.1583502;
 const RADIUS = 16093.4;
 
 const getAllBusinessesFromLocation = ({
