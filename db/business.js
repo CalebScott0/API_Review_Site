@@ -48,11 +48,21 @@ const getBusinessesCityState = () => {
   return prisma.$queryRaw`SELECT DISTINCT city, state FROM business;`;
 };
 
+// for search, match business by start of name - only if user has typed more than 2 letters
+const getBusinessesByName = (name) => {
+  if (name.length < 2) return [];
+
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
+                          FROM business
+                          WHERE "name" LIKE ${name}%`;
+};
+
 module.exports = {
   getAllBusinessesFromLocation,
   getBusinessesCityState,
   getBusinessesByCategory,
   getBusinessById,
+  getBusinessesByName,
   getBusinessHours,
   updateBusiness,
 };
