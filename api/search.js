@@ -1,5 +1,7 @@
 // CHANGE THIS TO BE A COMBINED SEARCH ENDPOINT WITH BUSINESSES?
 
+// slice out 3-4~ from businesses and categories in search combined endpoint
+
 // const express = require("express");
 // const category_router = express.Router();
 

@@ -54,7 +54,8 @@ const getBusinessesByName = (name) => {
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
                           FROM business
-                          WHERE "name" LIKE ${name}%`;
+                          WHERE "name" LIKE ${name}%
+                          ORDER BY average_stars DESC, review_count DESC`;
 };
 
 module.exports = {

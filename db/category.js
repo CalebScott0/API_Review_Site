@@ -8,6 +8,11 @@ const getCategories = () => {
                         ORDER BY c.name ASC`;
 };
 
+const getCategoriesByName = (name) => {
+  // oRDER BY COUNT (BUSINESS_ID) TO GRAB TOP 3-4 OPTIONS
+  // take 3-4~ or slice out in endpoint?
+};
+
 // categories for a specific business
 const getCategoriesForBusiness = async (business_id) => {
   return prisma.$queryRaw`SELECT c.* FROM category c
