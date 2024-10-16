@@ -6,7 +6,10 @@ const { getBusinessesByName } = require("../db/business");
 const express = require("express");
 const search_router = express.Router();
 
-// slice out 3-4~ from businesses and categories in search combined endpoint
+const LATITUDE = 39.7683331;
+const LONGITUDE = -86.1583502;
+const RADIUS = 16093.4;
+// defaults for indiananopilis, put these in env!!!! and change in business db to env variable
 
 // const express = require("express");
 // const category_router = express.Router();
