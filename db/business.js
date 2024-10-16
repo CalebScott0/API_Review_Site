@@ -27,11 +27,11 @@ const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business b
                           JOIN category_business cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
-                          LIMIT ${limit} OFFSET ${offset}`;
-  // -- ORDER BY average_stars DESC, review_count DESC`;
+                          LIMIT ${limit} OFFSET ${offset}
+                          ORDER BY average_stars DESC, review_count DESC`;
 };
 
-// from end point, db query will receive a business Id as well as an updated average_stars and/or review_count
+// from end point, db query will receive a business Id as well as an updated average_stars and/or review_count on review functions
 const updateBusiness = (id, data) => {
   return prisma.business.update({
     where: { id },

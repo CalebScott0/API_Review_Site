@@ -39,7 +39,7 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
-// GET /business/list/businesses_from_location -
+// GET api/business/list/businesses_from_location -
 // function can take latitude, longitude, and a radius
 business_router.get(
   "/list/businesses_from_location",
@@ -54,7 +54,7 @@ business_router.get(
   }
 );
 
-// GET /business/list/locations - returns unique combinations of city and state from db
+// GET api/business/list/locations - returns unique combinations of city and state from db
 business_router.get("/list/locations", async (req, res, next) => {
   try {
     const locations = await getBusinessesCityState();
@@ -105,7 +105,7 @@ business_router.get("/list/category/:category_id", async (req, res, next) => {
   }
 });
 
-// GET /business/reviews/:busienss_id
+// GET api/business/reviews/:busienss_id
 business_router.get("/reviews/:business_id", async (req, res, next) => {
   const { business_id } = req.params;
   const { limit, offset } = req.query;
@@ -126,7 +126,7 @@ business_router.get("/reviews/:business_id", async (req, res, next) => {
   }
 });
 
-// GET /business/photos/:business_id
+// GET api/business/photos/:business_id
 business_router.get("/photos/:business_id", async (req, res, next) => {
   const { business_id } = req.params;
   try {
