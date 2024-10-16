@@ -1,7 +1,7 @@
 const prisma = require("./index");
 
 const getBusinessById = (id) => {
-  return prisma.$queryRaw`SELECT * FROM business
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
                         WHERE id = ${id}`;
 };
 
@@ -10,22 +10,25 @@ const LATITUDE = 39.7683331;
 const LONGITUDE = -86.1583502;
 const RADIUS = 16093.4;
 
-const getAllBusinessesFromLocation = ({
+const getAllBusinessesFromLocation = (
   latitude = LATITUDE,
   longitude = LONGITUDE,
   radius = RADIUS,
-}) => {
-  return prisma.$queryRaw`SELECT * FROM business
-  -- where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
-  WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius});`;
+  limit = 10,
+  offset = 0
+) => {
+  // wrap location in ST_AsText to turn geometry type into string
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business 
+  WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius}) LIMIT ${limit} OFFSET ${offset};`;
+  // where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
 };
 
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
-  return prisma.$queryRaw`SELECT DISTINCT b.* FROM business b
-                        JOIN category_business cb ON b.id = cb.business_id
-                        WHERE category_id = ${category_id}
-                        ORDER BY average_stars DESC, review_count DESC
-                        LIMIT ${limit} OFFSET ${offset}`;
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business b
+                          JOIN category_business cb ON b.id = cb.business_id
+                          WHERE cb.category_id = ${category_id}
+                          LIMIT ${limit} OFFSET ${offset}`;
+  // -- ORDER BY average_stars DESC, review_count DESC`;
 };
 
 // from end point, db query will receive a business Id as well as an updated average_stars and/or review_count
