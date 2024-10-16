@@ -13,7 +13,6 @@ const RADIUS = 16093.4;
 search_router.use("/", async (req, res, next) => {
   try {
     const { query } = req.query;
-    if (!query.length) next();
     // grab several categories and businesses with user query, compares with LIKE %query%
     // business only returns once query length > 2
     // 5 categories, 3 businesses
