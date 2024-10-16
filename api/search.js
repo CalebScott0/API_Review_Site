@@ -20,7 +20,7 @@ search_router.use("/", async (req, res, next) => {
       getCategoriesByName({ query }),
       getBusinessesByName({ query }),
     ]);
-    // remove BigInt count of business from sql query needed for order by
+    // // remove BigInt count of business from sql query needed for order by
     const categories_remove_count = categories.map((category) => {
       return {
         id: category.id,
