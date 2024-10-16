@@ -4,7 +4,8 @@ const {
   getAllBusinesses,
   getBusinessesByCategory,
   getBusinessById,
-  getBusinessHours,
+  getBusinessHours
+  getBusinessLocations,
 } = require("../db/business");
 const { getCategoriesForBusiness } = require("../db/category");
 const { getReviewsForBusiness } = require("../db/review");
@@ -49,8 +50,19 @@ business_router.get("/list/all_businesses", async (req, res, next) => {
   }
 });
 
+// GET /business/list/locations - returns unique combinations of city and state from db
+business_router.get("/list/locations", async (req, res, next) => {
+  try {
+    const locations = await getBusinessLocations();
+
+    res.send({ locations });
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
+
 // Get a list of businesses with a given category_id
-// GET /api/business/category/:category_id
+// GET /api/business/list/category/:category_id
 business_router.get("/list/category/:category_id", async (req, res, next) => {
   try {
     const { category_id } = req.params;

@@ -30,10 +30,15 @@ const getBusinessHours = (id) => {
                           WHERE business_id = ${id}`;
 };
 
+const getBusinessLocations = () => {
+  return prisma.$queryRaw`SELECT DISTINCT city, state FROM business;`;
+};
+
 module.exports = {
   getAllBusinesses,
   getBusinessesByCategory,
   getBusinessById,
   getBusinessHours,
+  getBusinessLocations,
   updateBusiness,
 };
