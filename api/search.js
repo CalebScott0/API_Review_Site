@@ -1,5 +1,3 @@
-// CHANGE THIS TO BE A COMBINED SEARCH ENDPOINT WITH BUSINESSES?
-
 const { getCategoriesByName } = require("../db/category");
 
 const { getBusinessesByName } = require("../db/business");
@@ -11,29 +9,30 @@ const LONGITUDE = -86.1583502;
 const RADIUS = 16093.4;
 // defaults for indiananopilis, put these in env!!!! and change in business db to env variable
 
-// const express = require("express");
-// const category_router = express.Router();
+// get /api/search?query
+search_router.use("/", async (req, res, next) => {
+  try {
+    const { query } = req.query;
+    // grab several categories and businesses with user query, compares with LIKE %query%
+    // business only returns once query length > 2
+    // 5 categories, 3 businesses
+    const [categories, businesses] = await Promise.all([
+      getCategoriesByName({ query }),
+      getBusinessesByName({ query }),
+    ]);
+    // remove BigInt count of business from sql query needed for order by
+    const categories_remove_count = categories.map((category) => {
+      return {
+        id: category.id,
+        name: category.name,
+      };
+    });
+    const search_results = [...categories_remove_count, ...businesses];
 
-// const { getCategories } = require("../db/category");
+    res.send({ search_results });
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
 
-// // GET api/category/list/all_categories - returns all distinct categories of current businesses
-// category_router.get("/list/all_categories", async (req, res, next) => {
-//   try {
-//     const categories = await getCategories();
-//     res.send({ categories });
-//   } catch ({ name, message }) {
-//     next({ name, message });
-//   }
-// });
-
-// module.exports = category_router;
-
-async function test() {
-  const { query } = { query: "Ac" };
-  const [categories, businesses] = await Promise.all([
-    getCategoriesByName({ query }),
-    getBusinessesByName({ query }),
-  ]);
-  console.log([...categories, ...businesses]);
-}
-test();
+module.exports = search_router;

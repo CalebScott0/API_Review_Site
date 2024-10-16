@@ -45,12 +45,13 @@ const getBusinessesCityState = () => {
 };
 
 // for search, match business by start of name - only if user has typed more than 2 letters
+// ILIKE for case insensitive search
 const getBusinessesByName = ({ query, limit = 3 }) => {
   if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
                           FROM business
-                          WHERE "name" LIKE ${`${query}%`}
+                          WHERE "name" ILIKE ${`${query}%`}
                           ORDER BY review_count DESC, average_stars DESC
                           LIMIT ${limit}`;
 };
@@ -64,7 +65,7 @@ const updateBusiness = (id, data) => {
 };
 
 module.exports = {
-  getAllBusinessesFromLocation,
+  // getAllBusinessesFromLocation,
   getBusinessesCityState,
   getBusinessesByCategory,
   getBusinessById,

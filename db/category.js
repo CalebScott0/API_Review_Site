@@ -13,11 +13,12 @@ const getCategories = () => {
 
 // ORDER BY COUNT (BUSINESS_ID) TO GRAB TOP 3-4 OPTIONS
 // limit for search
+// ILIKE for case insensitive search
 const getCategoriesByName = ({ query, limit = 5 }) => {
   return prisma.$queryRaw`SELECT c.*, COUNT(cb.business_id)
                         FROM category c
                         JOIN category_business cb ON c.id = cb.category_id
-                        WHERE c.name LIKE ${`${query}%`}
+                        WHERE c.name ILIKE ${`${query}%`}
                         GROUP BY c.id
                         ORDER BY COUNT(cb.business_id) DESC
                         LIMIT ${limit}`;
