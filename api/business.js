@@ -1,12 +1,12 @@
 const express = require("express");
 const business_router = express.Router();
 const {
-  getAllBusinesses,
+  getAllBusinessesFromLocation,
   getBusinessesByCategory,
   getBusinessById,
   getBusinessHours,
 } = require("../db/business");
-const { getBusinessLocations } = require("../db/location");
+const { getBusinessesCityState } = require("../db/location");
 const { getCategoriesForBusiness } = require("../db/category");
 const { getReviewsForBusiness } = require("../db/review");
 const { getPhotosForBusiness } = require("../db/photo");
@@ -39,21 +39,24 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
-// GET /business/all_businesses
-business_router.get("/list/all_businesses", async (req, res, next) => {
-  try {
-    const businesses = await getAllBusinesses();
+// GET /business/list/businesses_from_location
+business_router.get(
+  "/list/businesses_from_location",
+  async (req, res, next) => {
+    try {
+      const businesses = await getAllBusinessesFromLocation();
 
-    res.send({ businesses });
-  } catch ({ name, message }) {
-    next({ name, message });
+      res.send({ businesses });
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
   }
-});
+);
 
 // GET /business/list/locations - returns unique combinations of city and state from db
 business_router.get("/list/locations", async (req, res, next) => {
   try {
-    const locations = await getBusinessLocations();
+    const locations = await getBusinessesCityState();
 
     res.send({ locations });
   } catch ({ name, message }) {

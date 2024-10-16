@@ -23,7 +23,8 @@ model business {
   postal_code         String?
   state               String?
   is_open             Boolean                  @default(false)
-  // location using Unsopported type for PostGIS
+  // location using Unsupported type for PostGIS
+  // index created in postico on location with GIST for spatial operations
   location            Unsupported("geometry")?
   categories          category_business[]
   reviews             review[]

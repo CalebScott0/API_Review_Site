@@ -5,8 +5,19 @@ const getBusinessById = (id) => {
                         WHERE id = ${id}`;
 };
 
-const getAllBusinesses = () => {
-  return prisma.$queryRaw`SELECT id, "name" FROM business`;
+// default coordinates Indianapolis, IN with default radius 10mi.
+const LATITUDE = "39.7683331";
+const LONGITUDE = "-86.1583502";
+const RADIUS = 16093.4;
+
+const getAllBusinessesFromLocation = ({
+  latitude = LATITUDE,
+  longitude = LONGITUDE,
+  radius = RADIUS,
+}) => {
+  return prisma.$queryRaw`SELECT * FROM business
+  -- where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
+  WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius});`;
 };
 
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
@@ -30,12 +41,13 @@ const getBusinessHours = (id) => {
                           WHERE business_id = ${id}`;
 };
 
-const getBusinessLocations = () => {
+const getBusinessesCityState = () => {
   return prisma.$queryRaw`SELECT DISTINCT city, state FROM business;`;
 };
 
 module.exports = {
-  getAllBusinesses,
+  getAllBusinessesFromLocation,
+  getBusinessesCityState,
   getBusinessesByCategory,
   getBusinessById,
   getBusinessHours,
