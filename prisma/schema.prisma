@@ -23,8 +23,6 @@ model business {
   postal_code         String?
   state               String?
   is_open             Boolean                  @default(false)
-  latitude            Float?
-  longitude           Float?
   // location using Unsopported type for PostGIS
   location            Unsupported("geometry")?
   categories          category_business[]
