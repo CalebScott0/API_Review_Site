@@ -4,7 +4,7 @@ const {
   getAllBusinesses,
   getBusinessesByCategory,
   getBusinessById,
-  getBusinessHours
+  getBusinessHours,
   getBusinessLocations,
 } = require("../db/business");
 const { getCategoriesForBusiness } = require("../db/category");
