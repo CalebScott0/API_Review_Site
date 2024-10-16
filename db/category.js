@@ -16,7 +16,8 @@ const getCategoriesByName = ({ query }) => {
   return prisma.$queryRaw`SELECT DISTINCT c.*
                         FROM category c
                         JOIN category_business cb ON c.id = cb.category_id
-                        ORDER BY c.name ASC`;
+                        where c.name LIKE ${query}%
+                        ORDER COUNT(cb.business_id) DESC`;
 };
 
 // categories for a specific business
