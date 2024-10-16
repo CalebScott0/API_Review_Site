@@ -49,12 +49,12 @@ const getBusinessesCityState = () => {
 };
 
 // for search, match business by start of name - only if user has typed more than 2 letters
-const getBusinessesByName = (name) => {
-  if (name.length < 2) return [];
+const getBusinessesByName = ({ query }) => {
+  if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
                           FROM business
-                          WHERE "name" LIKE ${name}%
+                          WHERE "name" LIKE ${query}%
                           ORDER BY average_stars DESC, review_count DESC`;
 };
 
