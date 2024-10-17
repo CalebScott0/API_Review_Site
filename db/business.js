@@ -41,18 +41,20 @@ const getBusinessHours = (id) => {
 };
 
 // return locations filtered with user search query
-const getBusinessesCityState = ({ query }) => {
+const getBusinessesCityState = ({ query, limit = 5 }) => {
   // if query includes a state
   if (query.indexOf(",") > 0) {
     const city = query.slice(0, query.indexOf(","));
     const state = query.slice(query.indexOf(",") + 1).trim();
     return prisma.$queryRaw`SELECT DISTINCT city, state FROM business
                             WHERE state ILIKE ${`${state}%`}
-                            AND city ILIKE ${`${city}%`}`;
+                            AND city ILIKE ${`${city}%`}
+                            LIMIT ${limit}`;
   } else {
     // on input that does not yet include a state
     return prisma.$queryRaw`SELECT DISTINCT city, state FROM business
-                            WHERE city ILIKE ${`${query}%`}`;
+                            WHERE city ILIKE ${`${query}%`}
+                            LIMIT ${limit}`;
   }
 };
 
