@@ -27,7 +27,7 @@ search_router.use("/", async (req, res, next) => {
         name: category.name,
       };
     });
-    const search_results = [...categories_remove_count, ...businesses];
+    const search_results = { categories, businesses };
 
     res.send({ search_results });
   } catch ({ name, message }) {
