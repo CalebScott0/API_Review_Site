@@ -46,26 +46,21 @@ const getBusinessesCityState = ({ query, limit = 5 }) => {
   if (query.indexOf(",") > 0) {
     const city = query.slice(0, query.indexOf(","));
     const state = query.slice(query.indexOf(",") + 1).trim();
-    return prisma.$queryRaw`SELECT DISTINCT city, state FROM business
-                            WHERE state ILIKE ${`${state}%`}
-                            AND city ILIKE ${`${city}%`}
+    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM business
+                            WHERE city ILIKE ${`${city}%`}
+                            AND state ILIKE ${`${state}%`}
+                            GROUP BY city, state
+                            ORDER BY business_count DESC
                             LIMIT ${limit}`;
   } else {
     // on input that does not yet include a state
-    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(business_id) FROM business
+    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM business
                             WHERE city ILIKE ${`${query}%`}
+                            GROUP BY city, state
+                            ORDER  BY business_count DESC
                             LIMIT ${limit}`;
   }
 };
-
-async function yuh() {
-  console.log(
-    await getBusinessesCityState({
-      query: "In",
-    })
-  );
-}
-yuh();
 
 // for search, match business by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search

@@ -58,7 +58,14 @@ business_router.get("/:id", async (req, res, next) => {
 business_router.get("/list/locations", async (req, res, next) => {
   try {
     const { query } = req.query;
-    const locations = await getBusinessesCityState({ query });
+    let locations = await getBusinessesCityState({ query });
+    // remove big int count
+    locations = locations.map(({ city, state }) => ({
+      city,
+      state,
+    }));
+
+    // CREATE MAP FOR CITY AND CLEAN CITY NAME
 
     res.send({ locations });
   } catch ({ name, message }) {
@@ -80,12 +87,12 @@ business_router.get("/list/category/:category_id", async (req, res, next) => {
     const business_list = await Promise.all(
       // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
       // get categories for business
-      get_businesses.map(async (business) => {
+      get_businesses.map(async ({ id }) => {
         // let [business_hours, categories] = await Promise.all([
         let [review, business_hours, categories] = await Promise.all([
-          getReviewsForBusiness({ business_id: business.id }),
-          getBusinessHours(business.id),
-          getCategoriesForBusiness(business.id),
+          getReviewsForBusiness({ business_id: id }),
+          getBusinessHours(id),
+          getCategoriesForBusiness(id),
         ]);
         return {
           ...business,

@@ -16,18 +16,18 @@ search_router.use("/", async (req, res, next) => {
     // grab several categories and businesses with user query, compares with LIKE %query%
     // business only returns once query length > 2
     // 5 categories, 3 businesses
-    const [categories, businesses] = await Promise.all([
+    let [categories, businesses] = await Promise.all([
       getCategoriesByName({ query }),
       getBusinessesByName({ query }),
     ]);
     // // remove BigInt count of business from sql query needed for order by
-    const categories_remove_count = categories.map((category) => {
+    categories = categories.map(({ id, name }) => {
       return {
-        id: category.id,
-        name: category.name,
+        id,
+        name,
       };
     });
-    const search_results = { categories, businesses };
+    const search_results = { categories: categories, businesses: businesses };
 
     res.send({ search_results });
   } catch ({ name, message }) {
