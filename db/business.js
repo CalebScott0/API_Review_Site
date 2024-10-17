@@ -40,9 +40,23 @@ const getBusinessHours = (id) => {
                           WHERE business_id = ${id}`;
 };
 
-const getBusinessesCityState = () => {
-  return prisma.$queryRaw`SELECT DISTINCT city, state FROM business;`;
+// return locations filtered with user search query
+const getBusinessesCityState = ({ query }) => {
+  const city = query.slice(0, query.indexOf(","));
+  const state = query.slice(-2);
+  return prisma.$queryRaw`SELECT DISTINCT state, city FROM business
+                          WHERE state ILIKE ${`${state}%`}
+                          AND city ILIKE ${`${city}%`}`;
 };
+
+async function yuh() {
+  console.log(
+    await getBusinessesCityState({
+      query: "Ind, In",
+    })
+  );
+}
+yuh();
 
 // for search, match business by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search

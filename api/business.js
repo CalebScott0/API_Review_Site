@@ -57,7 +57,8 @@ business_router.get("/:id", async (req, res, next) => {
 // GET api/business/list/locations - returns unique combinations of city and state from db
 business_router.get("/list/locations", async (req, res, next) => {
   try {
-    const locations = await getBusinessesCityState();
+    const { query } = req.query;
+    const locations = await getBusinessesCityState({ query });
 
     res.send({ locations });
   } catch ({ name, message }) {
