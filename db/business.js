@@ -12,19 +12,19 @@ const LATITUDE = 39.7683331;
 const LONGITUDE = -86.1583502;
 const RADIUS = 16093.4;
 
-// const getAllBusinessesFromLocation = (
-//   latitude = LATITUDE,
-//   longitude = LONGITUDE,
-//   radius = RADIUS,
-//   limit = 10,
-//   offset = 0
-// ) => {
-//   // wrap location in ST_AsText to turn geometry type into string
-//   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
-//   WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius}) LIMIT ${limit} OFFSET ${offset}
-//   ORDER BY review_count DESC, average_stars DESC;`;
-//   // where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
-// };
+const getAllBusinessesFromLocation = (
+  latitude = LATITUDE,
+  longitude = LONGITUDE,
+  radius = RADIUS,
+  limit = 10,
+  offset = 0
+) => {
+  // wrap location in ST_AsText to turn geometry type into string
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
+  WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius}) LIMIT ${limit} OFFSET ${offset}
+  ORDER BY review_count DESC, average_stars DESC;`;
+  // where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
+};
 
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
@@ -42,17 +42,24 @@ const getBusinessHours = (id) => {
 
 // return locations filtered with user search query
 const getBusinessesCityState = ({ query }) => {
-  const city = query.slice(0, query.indexOf(","));
-  const state = query.slice(-2);
-  return prisma.$queryRaw`SELECT DISTINCT state, city FROM business
-                          WHERE state ILIKE ${`${state}%`}
-                          AND city ILIKE ${`${city}%`}`;
+  // if query includes a state
+  if (query.indexOf(",") > 0) {
+    const city = query.slice(0, query.indexOf(","));
+    const state = query.slice(query.indexOf(",") + 1).trim();
+    return prisma.$queryRaw`SELECT DISTINCT city, state FROM business
+                            WHERE state ILIKE ${`${state}%`}
+                            AND city ILIKE ${`${city}%`}`;
+  } else {
+    // on input that does not yet include a state
+    return prisma.$queryRaw`SELECT DISTINCT city, state FROM business
+                            WHERE city ILIKE ${`${query}%`}`;
+  }
 };
 
 async function yuh() {
   console.log(
     await getBusinessesCityState({
-      query: "Ind, In",
+      query: "In",
     })
   );
 }
@@ -79,7 +86,7 @@ const updateBusiness = (id, data) => {
 };
 
 module.exports = {
-  // getAllBusinessesFromLocation,
+  getAllBusinessesFromLocation,
   getBusinessesCityState,
   getBusinessesByCategory,
   getBusinessById,
