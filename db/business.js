@@ -20,10 +20,11 @@ const getAllBusinessesFromLocation = (
   offset = 0
 ) => {
   // wrap location in ST_AsText to turn geometry type into string
-  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
-  WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius}) LIMIT ${limit} OFFSET ${offset}
-  ORDER BY review_count DESC, average_stars DESC;`;
   // where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
+                          WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius}) 
+                          ORDER BY review_count DESC, average_stars DESC
+                          LIMIT ${limit} OFFSET ${offset};`;
 };
 
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
@@ -31,8 +32,8 @@ const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
                           FROM business b
                           JOIN category_business cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
-                          LIMIT ${limit} OFFSET ${offset}
-                          ORDER BY review_count DESC, average_stars DESC`;
+                          ORDER BY review_count DESC, average_stars DESC
+                          LIMIT ${limit} OFFSET ${offset};`;
 };
 
 const getBusinessHours = (id) => {

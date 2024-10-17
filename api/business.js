@@ -39,20 +39,21 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
-// // GET api/business/list/businesses_from_location -
-// // function can take latitude, longitude, and a radius
-// business_router.get(
-//   "/list/businesses_from_location",
-//   async (req, res, next) => {
-//     try {
-//       const businesses = await getAllBusinessesFromLocation();
+// GET api/business/list/businesses_from_location -
+// function can take latitude, longitude, and a radius
+// has a default in db query
+business_router.get(
+  "/list/businesses_from_location",
+  async (req, res, next) => {
+    try {
+      const businesses = await getAllBusinessesFromLocation();
 
-//       res.send({ businesses });
-//     } catch ({ name, message }) {
-//       next({ name, message });
-//     }
-//   }
-// );
+      res.send({ businesses });
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
+  }
+);
 
 // GET api/business/list/locations - returns unique combinations of city and state from db
 business_router.get("/list/locations", async (req, res, next) => {
