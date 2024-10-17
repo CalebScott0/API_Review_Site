@@ -18,7 +18,7 @@ const getCategoriesByName = ({ query, limit = 5 }) => {
   return prisma.$queryRaw`SELECT c.*, COUNT(cb.business_id)
                         FROM category c
                         JOIN category_business cb ON c.id = cb.category_id
-                        WHERE c.name ILIKE ${`${query}%`}
+                        WHERE c.name ILIKE ${`%${query}%`}
                         GROUP BY c.id
                         ORDER BY COUNT(cb.business_id) DESC
                         LIMIT ${limit}`;

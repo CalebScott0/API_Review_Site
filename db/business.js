@@ -74,7 +74,7 @@ const getBusinessesByName = ({ query, limit = 3 }) => {
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
                           FROM business
-                          WHERE "name" ILIKE ${`${query}%`}
+                          WHERE "name" ILIKE ${`%${query}%`}
                           ORDER BY review_count DESC, average_stars DESC
                           LIMIT ${limit}`;
 };
