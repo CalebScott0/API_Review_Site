@@ -39,24 +39,24 @@ business_router.get("/:id", async (req, res, next) => {
   }
 });
 
-// GET api/business/list/locations - returns unique combinations of city and state from db
-business_router.get("/list/locations", async (req, res, next) => {
-  try {
-    const { query } = req.query;
-    let locations = await getBusinessesCityState({ query });
-    // remove big int count
-    locations = locations.map(({ city, state }) => ({
-      city,
-      state,
-    }));
+// // GET api/business/list/locations - returns unique combinations of city and state from db
+// business_router.get("/list/locations", async (req, res, next) => {
+//   try {
+//     const { query } = req.query;
+//     let locations = await getBusinessesCityState({ query });
+//     // remove big int count
+//     locations = locations.map(({ city, state }) => ({
+//       city,
+//       state,
+//     }));
 
-    // CREATE MAP FOR CITY AND CLEAN CITY NAME
+//     // CREATE MAP FOR CITY AND CLEAN CITY NAME
 
-    res.send({ locations });
-  } catch ({ name, message }) {
-    next({ name, message });
-  }
-});
+//     res.send({ locations });
+//   } catch ({ name, message }) {
+//     next({ name, message });
+//   }
+// });
 
 // GET api/business/list/businesses_from_location -
 // function can take latitude, longitude, and a radius
@@ -72,28 +72,26 @@ business_router.get(
         limit: +limit,
         offset: +offset,
       });
-      // const business_list = await Promise.all(
-      //   // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
-      //   // get categories for business
-      //   businesses.map(async ({ id }) => {
-      //     // let [business_hours, categories] = await Promise.all([
-      //     let [review, business_hours, categories] = await Promise.all([
-      //       getReviewsForBusiness({ business_id: id }),
-      //       getBusinessHours(id),
-      //       getCategoriesForBusiness(id),
-      //     ]);
-      //     return {
-      //       ...business,
-      //       hours: business_hours,
-      //       categories,
-      //       recent_review: review[0],
-      //     };
-      //   })
-      // );
+      const business_list = await Promise.all(
+        // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
+        // get categories for business
+        businesses.map(async (business) => {
+          // let [business_hours, categories] = await Promise.all([
+          let [review, business_hours, categories] = await Promise.all([
+            getReviewsForBusiness({ business_id: business.id }),
+            getBusinessHours(business.id),
+            getCategoriesForBusiness(business.id),
+          ]);
+          return {
+            ...businesses,
+            hours: business_hours,
+            categories,
+            recent_review: review[0],
+          };
+        })
+      );
 
-      res.send({ businesses });
-
-      res.send({ businesses });
+      res.send({ business_list });
     } catch ({ name, message }) {
       next({ name, message });
     }
@@ -114,12 +112,12 @@ business_router.get("/list/category/:category_id", async (req, res, next) => {
     const business_list = await Promise.all(
       // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
       // get categories for business
-      businesses.map(async ({ id }) => {
+      businesses.map(async (business) => {
         // let [business_hours, categories] = await Promise.all([
         let [review, business_hours, categories] = await Promise.all([
-          getReviewsForBusiness({ business_id: id }),
-          getBusinessHours(id),
-          getCategoriesForBusiness(id),
+          getReviewsForBusiness({ business_id: business.id }),
+          getBusinessHours(business.id),
+          getCategoriesForBusiness(business.id),
         ]);
         return {
           ...business,

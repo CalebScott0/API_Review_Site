@@ -12,15 +12,16 @@ const LATITUDE = 39.7683331;
 const LONGITUDE = -86.1583502;
 const RADIUS = 16093.4;
 
-const getAllBusinessesFromLocation = (
-  latitude = LATITUDE,
-  longitude = LONGITUDE,
-  radius = RADIUS,
+const getAllBusinessesFromLocation = ({
+  latitude = 39.7683331,
+  longitude = -86.1583502,
+  radius = 16093.4,
   limit = 10,
-  offset = 0
-) => {
+  offset = 0,
+}) => {
+  // console.log(longitude);
   // wrap location in ST_AsText to turn geometry type into string
-  // where (spacial type) distance is within a radius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
+  // where (spacial type) distance is within a rxadius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
                           WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${latitude},${longitude}), 4326), ${radius}) 
                           ORDER BY review_count DESC, average_stars DESC
