@@ -2,6 +2,8 @@ const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 const { parse } = require("csv-parse");
 
+const { faker } = require("@faker-js/faker");
+
 const prisma = new PrismaClient({
   log: ["info"],
 });
@@ -17,9 +19,9 @@ async function processCSV() {
   for await (const record of parser) {
     records.push({
       id: record[0],
-      username: record[1],
       password: record[2],
       first_name: record[3],
+      last_name: faker.person.lastName(),
       average_stars: parseFloat(record[6]),
       review_count: +record[7],
       user_since: new Date(record[9]),

@@ -5,7 +5,7 @@ const { parse } = require("csv-parse");
 const prisma = new PrismaClient({
   log: ["info"],
 });
-let friendsArr = [];
+let friends_array = [];
 let count = 0;
 //
 async function processCSV() {
@@ -18,6 +18,7 @@ async function processCSV() {
 
   for await (const record of parser) {
     const user_id = record[0];
+    console.log(`${++count} records parsed`);
 
     const user_friends = record[1].split(", ");
 
@@ -33,23 +34,26 @@ async function processCSV() {
         // Skip this friend if they don't exist
       } else {
         // set.add(friend_id);
-        friendsArr.push({
+        friends_array.push({
           user_id,
           friend_id,
         });
       }
     }
-
-    const BATCH_SIZE = 100;
-    if (friendsArr.length === BATCH_SIZE) {
+    let create_count = 0;
+    const total = friends_array.length;
+    const BATCH_SIZE = 10000;
+    if (friends_array.length === BATCH_SIZE) {
       try {
         await prisma.user_friend
           .createMany({
-            data: [...friendsArr.splice(0, friendsArr.length)],
+            data: [...friends_array.splice(0, friends_array.length)],
             skipDuplicates: true, // To avoid duplicates if the seeding is rerun
           })
-          .then(() => (count += BATCH_SIZE))
-          .then(() => console.log(`${count} friends created`));
+          .then(() => (create_count += BATCH_SIZE))
+          .then(() =>
+            console.log(`${create_count} friends created / ${total}`)
+          );
       } catch (error) {
         console.error("Unable to create batch:", error);
       }
@@ -57,14 +61,14 @@ async function processCSV() {
   }
   // }
   // remaining records
-  if (friendsArr.length > 0) {
+  if (friends_array.length > 0) {
     try {
       await prisma.user_friend.createMany({
-        data: friendsArr,
+        data: friends_array,
         skipDuplicates: true, // To avoid duplicates if the seeding is rerun
       });
 
-      console.log(`Inserted ${friendsArr.length} records`);
+      console.log(`Inserted ${friends_array.length} records`);
     } catch (error) {
       console.error("Unable to create batch:", error);
     }

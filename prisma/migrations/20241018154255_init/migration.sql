@@ -1,3 +1,5 @@
+CREATE EXTENSION IF NOT EXISTS postgis;
+
 -- CreateEnum
 CREATE TYPE "compliment_type" AS ENUM ('COOL', 'CUTE', 'FUNNY', 'HOT', 'LIST', 'MORE', 'NOTE', 'PHOTOS', 'PLAIN', 'PROFILE', 'WRITER');
 
@@ -51,7 +53,8 @@ CREATE TABLE "business" (
     "postal_code" TEXT,
     "state" TEXT,
     "is_open" BOOLEAN NOT NULL DEFAULT false,
-    "location" BYTEA NOT NULL,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION,
 
     CONSTRAINT "business_pkey" PRIMARY KEY ("id")
 );
@@ -152,8 +155,8 @@ CREATE TABLE "business_hours" (
     "id" TEXT NOT NULL,
     "business_id" TEXT NOT NULL,
     "day_of_week" "day_of_week" NOT NULL,
-    "open_time" TIME NOT NULL,
-    "close_time" TIME NOT NULL,
+    "open_time" TIME(6) NOT NULL,
+    "close_time" TIME(6) NOT NULL,
 
     CONSTRAINT "business_hours_pkey" PRIMARY KEY ("id")
 );
@@ -337,10 +340,10 @@ CREATE INDEX "attribute_music_business_attribute_id_idx" ON "attribute_music"("b
 CREATE UNIQUE INDEX "attribute_music_business_attribute_id_type_key" ON "attribute_music"("business_attribute_id", "type");
 
 -- AddForeignKey
-ALTER TABLE "user_friend" ADD CONSTRAINT "user_friend_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_friend" ADD CONSTRAINT "user_friend_friend_id_fkey" FOREIGN KEY ("friend_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "user_friend" ADD CONSTRAINT "user_friend_friend_id_fkey" FOREIGN KEY ("friend_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "user_friend" ADD CONSTRAINT "user_friend_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_compliment" ADD CONSTRAINT "user_compliment_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;

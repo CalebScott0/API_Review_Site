@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,64 +8,248 @@ datasource db {
 }
 
 model business {
-  id            String                   @id @default(uuid())
+  id            String  @id @default(uuid())
   name          String
-  average_stars Float                    @default(0.0)
-  review_count  Int                      @default(0)
+  average_stars Float   @default(0.0)
+  review_count  Int     @default(0)
   address       String?
   city          String?
   postal_code   String?
   state         String?
-  is_open       Boolean                  @default(false)
-  // location using Unsupported type for PostGIS
-  // index created in postico on location with GIST for spatial operations
-  location      Unsupported("geometry")?
+  is_open       Boolean @default(false)
 
-  categories          category_business[]
-  reviews             review[]
-  photos              photo_business[]
-  tips                tip[]
+  location            Geometry             @db.Geometry("Point", 4326) // Comment this out when running migrations
+  // LOCATION FIELD CREATED IN TERMINAL, location type geometry with lat / long, and indexed
+  // see location_business.js file in prisma
+  business_attributes business_attributes?
   business_hours      business_hours[]
-  business_attributes business_attributes[]
+  categories          category_business[]
+  photos              photo_business[]
+  reviews             review[]
+  tips                tip[]
+
+  @@index("idx_business_location", gist[location])
 }
 
 model user {
-  id            String   @id @default(uuid())
-  password      String
-  first_name    String?
-  last_name     String?
-  email         String?  @unique
-  average_stars Float    @default(0.0)
-  review_count  Int      @default(0)
-  user_since    DateTime @default(now())
-  updated_at    DateTime @default(now())
-  // useful, funny, and cool are the total of votes sent by the user to other reviews
-  useful        Int      @default(0)
-  funny         Int      @default(0)
-  cool          Int      @default(0)
-  // fans = # of fans a user has (different than friends, fans only follow your account?)
-  fans          Int      @default(0)
-
+  id               String            @id @default(uuid())
+  password         String
+  first_name       String?
+  last_name        String?
+  email            String?           @unique
+  average_stars    Float             @default(0.0)
+  review_count     Int               @default(0)
+  user_since       DateTime          @default(now())
+  updated_at       DateTime          @default(now())
+  useful           Int               @default(0)
+  funny            Int               @default(0)
+  cool             Int               @default(0)
+  fans             Int               @default(0)
   reviews          review[]
   tips             tip[]
+  user_compliments user_compliment[]
   user_friend      user_friend[]     @relation("User_Friend_Relation")
   friends          user_friend[]
-  user_compliments user_compliment[]
 }
 
 model user_friend {
   user_id       String
   friend_id     String
   friends_since DateTime @default(now())
-
-  // CREATED_AT FOR HOW LONG YOU'VE BEEN FRIENDS?
-  // WOULD NEED TO SEED RANDOM FOR ALL FRIENDS
-
-  user   user @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  friend user @relation("User_Friend_Relation", fields: [friend_id], references: [id], onDelete: Cascade)
+  friend        user     @relation("User_Friend_Relation", fields: [friend_id], references: [id], onDelete: Cascade)
+  user          user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, friend_id])
   @@index([user_id])
+}
+
+model user_compliment {
+  id      String          @id @default(uuid())
+  user_id String
+  type    compliment_type
+  count   Int             @default(0)
+  user    user            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+}
+
+model review {
+  id          String   @id @default(uuid())
+  stars       Int
+  review_text String
+  useful      Int      @default(0)
+  funny       Int      @default(0)
+  cool        Int      @default(0)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+  author_id   String
+  business_id String
+  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@unique([author_id, business_id], name: "unique_author_review")
+  @@index([author_id, created_at])
+  @@index([business_id, created_at])
+}
+
+model category {
+  id                    String              @id @default(uuid())
+  name                  String              @unique
+  categories_businesses category_business[]
+}
+
+model category_business {
+  business_id String
+  category_id String
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  category    category @relation(fields: [category_id], references: [id])
+
+  @@id([business_id, category_id])
+  @@index([business_id])
+}
+
+model photo_business {
+  id          String           @id @default(uuid())
+  caption     String?
+  label       photo_label_type
+  business_id String
+  business    business         @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@index([business_id])
+}
+
+model tip {
+  id          String   @id @default(uuid())
+  tip_text    String
+  created_at  DateTime @default(now())
+  author_id   String
+  business_id String
+  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@unique([author_id, business_id])
+  @@index([author_id, created_at])
+  @@index([business_id, created_at])
+}
+
+model business_hours {
+  id          String      @id @default(uuid())
+  business_id String
+  day_of_week day_of_week
+  open_time   DateTime    @db.Time(6)
+  close_time  DateTime    @db.Time(6)
+  business    business    @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@unique([business_id, day_of_week])
+  @@index([business_id])
+}
+
+model business_attributes {
+  business_id                   String                       @unique
+  accepts_insurance             Boolean?
+  alcohol                       alcohol_type?
+  bike_parking                  Boolean?
+  business_accepts_bitcoin      Boolean?
+  business_accepts_credit_cards Boolean?
+  by_appointment_only           Boolean?
+  byob                          Boolean?
+  byob_corkage                  byob_corkage_type?
+  caters                        Boolean?
+  coat_check                    Boolean?
+  corkage                       Boolean?
+  dogs_allowed                  Boolean?
+  drive_thru                    Boolean?
+  good_for_dancing              Boolean?
+  good_for_kids                 Boolean?
+  happy_hour                    Boolean?
+  has_tv                        Boolean?
+  noise_level                   noise_level_type?
+  outdoor_seating               Boolean?
+  restaurant_attire             restaurant_attire_type?
+  restaurant_delivery           Boolean?
+  restaurant_good_for_groups    Boolean?
+  restaurant_price_range        Int?
+  restaurant_reservations       Boolean?
+  restaurant_table_service      Boolean?
+  restaurant_take_out           Boolean?
+  smoking                       smoking_type?
+  wheelchair_accessible         Boolean?
+  wifi                          wifi_type?
+  ambience                      attribute_ambience[]
+  best_nights                   attribute_best_nights[]
+  business_parking              attribute_business_parking[]
+  good_for_meal                 attribute_good_for_meal[]
+  hair_speciality               attribute_hair_speciality[]
+  music                         attribute_music[]
+  business                      business                     @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  @@index([business_id])
+}
+
+model attribute_ambience {
+  id                    String              @id @default(uuid())
+  business_attribute_id String
+  type                  ambience_type
+  value                 Boolean
+  business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@unique([business_attribute_id, type])
+  @@index([business_attribute_id])
+}
+
+model attribute_best_nights {
+  id                    String              @id @default(uuid())
+  business_attribute_id String
+  day_of_week           day_of_week
+  value                 Boolean
+  business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@unique([business_attribute_id, day_of_week])
+  @@index([business_attribute_id])
+}
+
+model attribute_business_parking {
+  id                    String                @id @default(uuid())
+  business_attribute_id String
+  type                  business_parking_type
+  value                 Boolean
+  business_attribute    business_attributes   @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@unique([business_attribute_id, type])
+  @@index([business_attribute_id])
+}
+
+model attribute_good_for_meal {
+  id                    String              @id @default(uuid())
+  business_attribute_id String
+  type                  meal_type
+  value                 Boolean
+  business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@unique([business_attribute_id, type])
+  @@index([business_attribute_id])
+}
+
+model attribute_hair_speciality {
+  id                    String               @id @default(uuid())
+  business_attribute_id String
+  type                  hair_speciality_type
+  value                 Boolean
+  business_attribute    business_attributes  @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@unique([business_attribute_id, type])
+  @@index([business_attribute_id])
+}
+
+model attribute_music {
+  id                    String              @id @default(uuid())
+  business_attribute_id String
+  type                  music_type
+  value                 Boolean
+  business_attribute    business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
+
+  @@unique([business_attribute_id, type])
+  @@index([business_attribute_id])
 }
 
 enum compliment_type {
@@ -88,91 +266,12 @@ enum compliment_type {
   WRITER
 }
 
-model user_compliment {
-  id      String          @id @default(uuid())
-  user_id String
-  type    compliment_type
-  count   Int             @default(0)
-  // created_at DateTime        @default(now())
-
-  user user @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  // @@unique([user_id, type])
-  @@index([user_id])
-}
-
-model review {
-  id          String   @id @default(uuid())
-  stars       Int
-  review_text String
-  useful      Int      @default(0)
-  funny       Int      @default(0)
-  cool        Int      @default(0)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
-
-  author_id   String
-  business_id String
-
-  author   user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  @@unique(name: "unique_author_review", [author_id, business_id])
-  @@index([author_id, created_at])
-  @@index([business_id, created_at])
-}
-
-model category {
-  id   String @id @default(uuid())
-  name String @unique
-
-  categories_businesses category_business[]
-}
-
-model category_business {
-  business_id String
-  category_id String
-
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  category category @relation(fields: [category_id], references: [id])
-
-  @@id([business_id, category_id])
-  @@index([business_id])
-}
-
 enum photo_label_type {
   DRINK
   FOOD
   INSIDE
   MENU
   OUTSIDE
-}
-
-model photo_business {
-  id      String           @id @default(uuid())
-  caption String?
-  label   photo_label_type
-
-  business_id String
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  @@index([business_id])
-}
-
-model tip {
-  id         String   @id @default(uuid())
-  tip_text   String
-  created_at DateTime @default(now())
-
-  author_id   String
-  business_id String
-
-  author   user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  @@unique([author_id, business_id])
-  @@index([author_id, created_at])
-  @@index([business_id, created_at])
 }
 
 enum day_of_week {
@@ -184,21 +283,6 @@ enum day_of_week {
   SATURDAY
   SUNDAY
 }
-
-model business_hours {
-  id          String      @id @default(uuid())
-  business_id String
-  day_of_week day_of_week
-  open_time   DateTime    @db.Time()
-  close_time  DateTime    @db.Time()
-
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  @@unique([business_id, day_of_week])
-  @@index([business_id])
-}
-
-// enums for business attribute fields with singular values
 
 enum alcohol_type {
   BEER_AND_WINE
@@ -239,52 +323,6 @@ enum wifi_type {
   NONE
 }
 
-model business_attributes {
-  business_id                   String                       @unique
-  accepts_insurance             Boolean?
-  alcohol                       alcohol_type?
-  ambience                      attribute_ambience[]
-  best_nights                   attribute_best_nights[]
-  bike_parking                  Boolean?
-  business_accepts_bitcoin      Boolean?
-  business_accepts_credit_cards Boolean?
-  business_parking              attribute_business_parking[]
-  by_appointment_only           Boolean?
-  byob                          Boolean?
-  byob_corkage                  byob_corkage_type?
-  caters                        Boolean?
-  coat_check                    Boolean?
-  corkage                       Boolean?
-  dogs_allowed                  Boolean?
-  drive_thru                    Boolean?
-  good_for_dancing              Boolean?
-  good_for_kids                 Boolean?
-  good_for_meal                 attribute_good_for_meal[]
-  hair_speciality               attribute_hair_speciality[]
-  happy_hour                    Boolean?
-  has_tv                        Boolean?
-  music                         attribute_music[]
-  noise_level                   noise_level_type?
-  outdoor_seating               Boolean?
-  restaurant_attire             restaurant_attire_type?
-  restaurant_delivery           Boolean?
-  restaurant_good_for_groups    Boolean?
-  // int 1 - 4 representing price range
-  restaurant_price_range        Int?
-  restaurant_reservations       Boolean?
-  restaurant_table_service      Boolean?
-  restaurant_take_out           Boolean?
-  smoking                       smoking_type?
-  wheelchair_accessible         Boolean?
-  wifi                          wifi_type?
-
-  business business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-
-  @@index([business_id])
-}
-
-// fields from business attributes that will be parsed from json structures
-
 enum ambience_type {
   TOURISTY
   HIPSTER
@@ -297,53 +335,12 @@ enum ambience_type {
   CASUAL
 }
 
-model attribute_ambience {
-  id String @id @default(uuid())
-
-  business_attribute_id String
-  type                  ambience_type
-  value                 Boolean
-
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
-
-  // business should only be able to have on of each type in an attribute field
-  @@unique([business_attribute_id, type])
-  @@index([business_attribute_id])
-}
-
-model attribute_best_nights {
-  id String @id @default(uuid())
-
-  business_attribute_id String
-  // use enum of days of week already created
-  day_of_week           day_of_week
-  value                 Boolean
-
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
-
-  @@unique([business_attribute_id, day_of_week])
-  @@index([business_attribute_id])
-}
-
 enum business_parking_type {
   GARAGE
   LOT
   STREET
   VALET
   VALIDATED
-}
-
-model attribute_business_parking {
-  id String @id @default(uuid())
-
-  business_attribute_id String
-  type                  business_parking_type
-  value                 Boolean
-
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
-
-  @@unique([business_attribute_id, type])
-  @@index([business_attribute_id])
 }
 
 enum meal_type {
@@ -353,19 +350,6 @@ enum meal_type {
   DINNER
   LATENIGHT
   LUNCH
-}
-
-model attribute_good_for_meal {
-  id String @id @default(uuid())
-
-  business_attribute_id String
-  type                  meal_type
-  value                 Boolean
-
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
-
-  @@unique([business_attribute_id, type])
-  @@index([business_attribute_id])
 }
 
 enum hair_speciality_type {
@@ -379,19 +363,6 @@ enum hair_speciality_type {
   STRAIGHT_PERMS
 }
 
-model attribute_hair_speciality {
-  id String @id @default(uuid())
-
-  business_attribute_id String
-  type                  hair_speciality_type
-  value                 Boolean
-
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
-
-  @@unique([business_attribute_id, type])
-  @@index([business_attribute_id])
-}
-
 enum music_type {
   BACKGROUND_MUSIC
   DJ
@@ -401,52 +372,3 @@ enum music_type {
   NO_MUSIC
   VIDEO
 }
-
-model attribute_music {
-  id String @id @default(uuid())
-
-  business_attribute_id String
-  type                  music_type
-  value                 Boolean
-
-  business_attribute business_attributes @relation(fields: [business_attribute_id], references: [business_id], onDelete: Cascade)
-
-  @@unique([business_attribute_id, type])
-  @@index([business_attribute_id])
-}
-
-//   accepts_insurance             
-//   alcohol                       
-//   ambience                      
-//   byob                          
-//   byob_corkage                  
-//   best_nights                   
-//   bike_parking                  
-//   business_accepts_bitcoin      
-//   business_accepts_credit_cards 
-//   business_parking              
-//   by_appointment_only           
-//   caters                        
-//   coat_check                    
-//   corkage                       
-//   dogs_allowed                  
-//   drive_thru                    
-//   good_for_dancing              
-//   good_for_kids                 
-//   good_for_meal                 
-//   hair_speciality               
-//   happy_hour                    
-//   has_tv                        
-//   music                         
-//   noise_level                   
-//   outdooor_seating              
-//   restaurant_attire             
-//   restaurant_delivery           
-//   restaurant_good_for_groups    
-//   restaurant_price_range        
-//   restaurant_reservations       
-//   restaurant_table_service      
-//   restaurant_take_out           
-//   smoking                       
-//   wheelchair_accessible         
-//   wifi                          

@@ -5,7 +5,7 @@ const { parse } = require("csv-parse");
 const prisma = new PrismaClient({
   log: ["info"],
 });
-
+let count = 0;
 let records = [];
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
@@ -13,8 +13,7 @@ async function processCSV() {
     .createReadStream("/Users/cbs062/Desktop/Review_Site_CSV_Files/review.csv")
     .pipe(parse({ from_line: 2 }));
 
-  console.log("Parsing records...");
-
+  const BATCH_SIZE = 10;
   for await (const record of parser) {
     records.push({
       id: record[0],
@@ -28,7 +27,6 @@ async function processCSV() {
       created_at: new Date(record[9]),
       updated_at: new Date(record[10]),
     });
-    const BATCH_SIZE = 10;
 
     if (records.length === BATCH_SIZE) {
       (async () => {
@@ -56,7 +54,7 @@ async function processCSV() {
         console.log(error);
       }
     })()
-      .then(() => (count += BATCH_SIZE))
+      .then(() => (count += records.length))
       .then(() => console.log(`${count} reviews created`));
   }
 }
