@@ -14,18 +14,19 @@ datasource db {
 }
 
 model business {
-  id                  String                   @id @default(uuid())
-  name                String
-  average_stars       Float                    @default(0.0)
-  review_count        Int                      @default(0)
-  address             String?
-  city                String?
-  postal_code         String?
-  state               String?
-  is_open             Boolean                  @default(false)
+  id            String                   @id @default(uuid())
+  name          String
+  average_stars Float                    @default(0.0)
+  review_count  Int                      @default(0)
+  address       String?
+  city          String?
+  postal_code   String?
+  state         String?
+  is_open       Boolean                  @default(false)
   // location using Unsupported type for PostGIS
   // index created in postico on location with GIST for spatial operations
-  location            Unsupported("geometry")?
+  location      Unsupported("geometry")?
+
   categories          category_business[]
   reviews             review[]
   photos              photo_business[]
