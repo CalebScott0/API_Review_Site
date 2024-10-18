@@ -72,26 +72,26 @@ business_router.get(
         limit: +limit,
         offset: +offset,
       });
-      const business_list = await Promise.all(
-        // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
-        // get categories for business
-        businesses.map(async ({ id }) => {
-          // let [business_hours, categories] = await Promise.all([
-          let [review, business_hours, categories] = await Promise.all([
-            getReviewsForBusiness({ business_id: id }),
-            getBusinessHours(id),
-            getCategoriesForBusiness(id),
-          ]);
-          return {
-            ...business,
-            hours: business_hours,
-            categories,
-            recent_review: review[0],
-          };
-        })
-      );
+      // const business_list = await Promise.all(
+      //   // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
+      //   // get categories for business
+      //   businesses.map(async ({ id }) => {
+      //     // let [business_hours, categories] = await Promise.all([
+      //     let [review, business_hours, categories] = await Promise.all([
+      //       getReviewsForBusiness({ business_id: id }),
+      //       getBusinessHours(id),
+      //       getCategoriesForBusiness(id),
+      //     ]);
+      //     return {
+      //       ...business,
+      //       hours: business_hours,
+      //       categories,
+      //       recent_review: review[0],
+      //     };
+      //   })
+      // );
 
-      res.send({ business_list });
+      res.send({ businesses });
 
       res.send({ businesses });
     } catch ({ name, message }) {
