@@ -47,6 +47,7 @@ search_router.get("/locations", async (req, res, next) => {
       city,
       state,
     }));
+
     res.send({ locations });
   } catch ({ name, message }) {
     next({ name, message });
