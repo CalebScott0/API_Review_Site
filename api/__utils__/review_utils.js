@@ -1,4 +1,4 @@
-const { getReviewById, getUserReviewByBusiness } = require("../../db/review");
+const { getReviewById, getUserReviewByBusiness } = require("../../db/reviews");
 
 const checkCreateReviewData = async (req, res, next) => {
   const { review_text, stars } = req.body;

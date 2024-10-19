@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const { createUser, getUserByEmail } = require("../../db/user");
+const { createUser, getUserByEmail } = require("../../db/users");
 const { checkUserData, checkUserExists } = require("./utils");
 
 const auth_router = express.Router();

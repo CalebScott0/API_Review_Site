@@ -1,4 +1,4 @@
-const { getUserByEmail } = require("../../db/user");
+const { getUserByEmail } = require("../../db/users");
 
 // check user has provided a username and password in body of request
 const checkUserData = (req, res, next) => {

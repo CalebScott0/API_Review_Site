@@ -3,28 +3,22 @@ const prisma = require("./index");
 // ST_ASText to convert from geometry type to string
 const getBusinessById = (business_id) => {
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
-                          FROM business
+                          FROM businesses
                           WHERE id = ${business_id}`;
 };
 
-// STORE THESE IN ENV
-// default coordinates Indianapolis, IN with default radius 10mi.
-const LATITUDE = 39.7683331;
-const LONGITUDE = -86.1583502;
-const RADIUS = 16093.4;
-
 const getAllBusinessesFromLocation = ({
-  latitude = 39.7683331,
-  longitude = -86.1583502,
+  longitude,
+  latitude,
+  // default radius 10mi - in km
   radius = 16093.4,
   limit = 10,
   offset = 0,
 }) => {
-  // console.log(longitude);
   // wrap location in ST_AsText to turn geometry type into string
   // where (spacial type) distance is within a rxadius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
   //LONGITUDE BEFORE LATITUDE IN SPATIAL QUERIES WHERE YOU MAKE A POINT
-  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM business
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM businesses
                           WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${longitude},${latitude}), 4326), ${radius}) 
                           ORDER BY review_count DESC, average_stars DESC
                           LIMIT ${limit} OFFSET ${offset};`;
@@ -32,7 +26,7 @@ const getAllBusinessesFromLocation = ({
 
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
-                          FROM business b
+                          FROM businesses b
                           JOIN category_business cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
                           ORDER BY review_count DESC, average_stars DESC
@@ -52,10 +46,10 @@ const getBusinessPhotos = (business_id) => {
 // return locations filtered with user search query
 const getBusinessesCityState = ({ query, limit = 5 }) => {
   // if query includes a state
-  if (query.indexOf(",") > 0) {
+  if (query?.indexOf(",") > 0) {
     const city = query.slice(0, query.indexOf(","));
     const state = query.slice(query.indexOf(",") + 1).trim();
-    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM business
+    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
                             WHERE city ILIKE ${`${city}%`}
                             AND state ILIKE ${`${state}%`}
                             GROUP BY city, state
@@ -63,7 +57,7 @@ const getBusinessesCityState = ({ query, limit = 5 }) => {
                             LIMIT ${limit}`;
   } else {
     // on input that does not yet include a state
-    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM business
+    return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
                             WHERE city ILIKE ${`${query}%`}
                             GROUP BY city, state
                             ORDER  BY business_count DESC
@@ -71,21 +65,21 @@ const getBusinessesCityState = ({ query, limit = 5 }) => {
   }
 };
 
-// for search, match business by start of name - only if user has typed more than 2 letters
+// for search, match businesses by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search
 const getBusinessesByName = ({ query, limit = 3 }) => {
   if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
-                          FROM business
+                          FROM businesses
                           WHERE "name" ILIKE ${`${query}%`}
                           ORDER BY review_count DESC, average_stars DESC
                           LIMIT ${limit}`;
 };
 
-// from end point, db query will receive a business Id as well as an updated average_stars and/or review_count on review functions
+// from end point, db query will receive a businesses Id as well as an updated average_stars and/or review_count on review functions
 const updateBusiness = (id, data) => {
-  return prisma.business.update({
+  return prisma.businesses.update({
     where: { id },
     data,
   });

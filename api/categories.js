@@ -6,7 +6,11 @@ const { getCategories } = require("../db/categories");
 // GET api/categories/ - returns all distinct categories of current businesses
 category_router.get("/", async (req, res, next) => {
   try {
-    const categories = await getCategories();
+    let categories = await getCategories();
+    categories = categories.map(({ id, name }) => ({
+      id,
+      name,
+    }));
     res.send({ categories });
   } catch ({ name, message }) {
     next({ name, message });

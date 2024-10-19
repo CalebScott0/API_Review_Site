@@ -13,7 +13,7 @@ async function processCSV() {
     .createReadStream("/Users/cbs062/Desktop/Review_Site_CSV_Files/review.csv")
     .pipe(parse({ from_line: 2 }));
 
-  const BATCH_SIZE = 100;
+  const BATCH_SIZE = 1000;
   for await (const record of parser) {
     records.push({
       id: record[0],
