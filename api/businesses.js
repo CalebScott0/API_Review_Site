@@ -46,6 +46,7 @@ business_router.get("/nearby", async (req, res, next) => {
     const location_response = await fetch(url, options);
     const json = await location_response.json();
     // pass longitude and latitude from location iq to get all businesses from location function
+    // default radius parameter of 10miles converted to kilometers
     const fetch_businesses = await getAllBusinessesFromLocation({
       limit: +limit,
       offset: +offset,
