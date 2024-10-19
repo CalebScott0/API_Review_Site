@@ -67,7 +67,7 @@ const getBusinessesCityState = ({ query, limit = 5 }) => {
 
 // for search, match businesses by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search
-const getBusinessesByName = ({ query, limit = 3 }) => {
+const getBusinessesByName = ({ query = " ", limit = 3 }) => {
   if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
