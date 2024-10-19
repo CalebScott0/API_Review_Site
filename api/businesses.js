@@ -39,24 +39,24 @@ business_router.get("/:business_id", async (req, res, next) => {
   }
 });
 
-// GET api/businesses/locations - returns unique combinations of city and state from db
-business_router.get("/locations", async (req, res, next) => {
-  try {
-    const { query } = req.query;
-    let locations = await getBusinessesCityState({ query });
-    // remove big int count
-    locations = locations.map(({ city, state }) => ({
-      city,
-      state,
-    }));
+// // GET api/businesses/locations - returns unique combinations of city and state from db
+// business_router.get("/locations", async (req, res, next) => {
+//   try {
+//     const { query } = req.query;
+//     let locations = await getBusinessesCityState({ query });
+//     // remove big int count
+//     locations = locations.map(({ city, state }) => ({
+//       city,
+//       state,
+//     }));
 
-    // CREATE MAP FOR CITY AND CLEAN CITY NAME
+//     // CREATE MAP FOR CITY AND CLEAN CITY NAME
 
-    res.send({ locations });
-  } catch ({ name, message }) {
-    next({ name, message });
-  }
-});
+//     res.send({ locations });
+//   } catch ({ name, message }) {
+//     next({ name, message });
+//   }
+// });
 
 // GET api/businesses/nearby?query=city=""&state="" -
 // function can take latitude, longitude, and a radius
