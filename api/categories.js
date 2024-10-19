@@ -1,10 +1,10 @@
 const express = require("express");
 const category_router = express.Router();
 
-const { getCategories } = require("../db/category");
+const { getCategories } = require("../db/categories");
 
-// GET api/category/list/all_categories - returns all distinct categories of current businesses
-category_router.get("/list/all_categories", async (req, res, next) => {
+// GET api/categories/ - returns all distinct categories of current businesses
+category_router.get("/", async (req, res, next) => {
   try {
     const categories = await getCategories();
     res.send({ categories });

@@ -33,10 +33,10 @@ const checkUpdateReviewData = async (req, res, next) => {
 // check if user has review for business already
 // req.user will be set with token, businessId from endpoint param
 const checkUserHasReview = async (req, res, next) => {
-  const author_id = req.user.id;
+  const user_id = req.user.id;
   const { business_id } = req.params;
 
-  const hasReview = (await getUserReviewByBusiness(author_id, business_id))[0];
+  const hasReview = (await getUserReviewByBusiness(user_id, business_id))[0];
 
   if (hasReview) {
     return res.status(409).send({

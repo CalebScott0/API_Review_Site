@@ -4,7 +4,7 @@ const prisma = new PrismaClient({
 });
 
 (async function () {
-  const businesses = await prisma.business.findMany({
+  const businesses = await prisma.businesses.findMany({
     select: {
       id: true,
     },
@@ -13,7 +13,7 @@ const prisma = new PrismaClient({
     `Updating ${businesses.length} businesses with review count and average stars...`
   );
   // group reviews by business_id average on stars and total count
-  const business_stats = await prisma.review.groupBy({
+  const business_stats = await prisma.reviews.groupBy({
     by: ["business_id"],
     _avg: {
       stars: true, // Calculate the average stars
@@ -29,7 +29,7 @@ const prisma = new PrismaClient({
     const update_batch = business_stats
       .slice(i, i + BATCH_SIZE)
       .map((business) =>
-        prisma.business.update({
+        prisma.businesses.update({
           where: {
             id: business.business_id,
           },

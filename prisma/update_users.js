@@ -5,7 +5,7 @@ const prisma = new PrismaClient({
 });
 
 (async function () {
-  const users = await prisma.user.findMany({
+  const users = await prisma.users.findMany({
     select: {
       id: true,
     },
@@ -14,7 +14,7 @@ const prisma = new PrismaClient({
     `Updating ${users.length} users with review count and average stars...`
   );
   // group reviews by author_id average on stars and total count
-  const user_stats = await prisma.review.groupBy({
+  const user_stats = await prisma.reviews.groupBy({
     by: ["author_id"],
     _avg: {
       stars: true, // Calculate the average stars
@@ -29,7 +29,7 @@ const prisma = new PrismaClient({
   for (let i = 0; i < user_stats.length; i += BATCH_SIZE) {
     // create array of update promises
     const update_batch = user_stats.slice(i, i + BATCH_SIZE).map((user) =>
-      prisma.user.update({
+      prisma.users.update({
         where: {
           id: user.author_id,
         },

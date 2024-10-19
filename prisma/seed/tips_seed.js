@@ -29,7 +29,7 @@ async function processCSV() {
     const batch = records.splice(0, 100);
     (async () => {
       try {
-        await prisma.tip.createMany({
+        await prisma.tips.createMany({
           data: batch,
           skipDuplicates: true,
         });

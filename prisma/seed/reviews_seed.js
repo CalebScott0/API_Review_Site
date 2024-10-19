@@ -31,7 +31,7 @@ async function processCSV() {
     if (records.length === BATCH_SIZE) {
       (async () => {
         try {
-          await prisma.review.createMany({
+          await prisma.reviews.createMany({
             data: [...records.splice(0, records.length)],
             skipDuplicates: true,
           });
@@ -46,7 +46,7 @@ async function processCSV() {
   if (records.length > 0) {
     (async () => {
       try {
-        await prisma.review.createMany({
+        await prisma.reviews.createMany({
           data: records,
           skipDuplicates: true,
         });

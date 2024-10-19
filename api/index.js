@@ -1,7 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const { requireUser } = require("./__utils__/utils");
-const { getUserById } = require("../db/user");
+const { getUserById } = require("../db/users");
 
 const api_router = express.Router();
 
@@ -41,22 +41,22 @@ api_router.use(async (req, res, next) => {
   }
 });
 
-// /api/business
-api_router.use("/business", require("./business"));
+// /api/businesses
+api_router.use("/businesses", require("./businesses"));
 
-// /api/user
-api_router.use("/user", requireUser, require("./user"));
+// /api/users
+api_router.use("/users", requireUser, require("./usesr"));
 
 // /api/auth
 api_router.use("/auth", require("./auth/auth"));
 
-// /api/review
-api_router.use("/review", requireUser, require("./review"));
+// /api/reviews
+api_router.use("/reviews", requireUser, require("./reviews"));
 
 // /api/search
 api_router.use("/search", require("./search"));
 
 // /api/categories
-api_router.use("/category", require("./category"));
+api_router.use("/categories", require("./categories"));
 
 module.exports = api_router;

@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model business {
+model businesses {
   id            String  @id @default(uuid())
   name          String
   average_stars Float   @default(0.0)
@@ -17,115 +17,117 @@ model business {
   postal_code   String?
   state         String?
   is_open       Boolean @default(false)
+  longitude     Float
+  latitude      Float
 
-  location            Geometry             @db.Geometry("Point", 4326) // Comment this out when running migrations
+  // location            Geometry              @db.Geometry("Point", 4326) // Comment this out when running migrations
   // LOCATION FIELD CREATED IN TERMINAL, location type geometry with lat / long, and indexed
   // see location_business.js file in prisma
   business_attributes business_attributes?
   business_hours      business_hours[]
-  categories          category_business[]
-  photos              photo_business[]
-  reviews             review[]
-  tips                tip[]
+  categories          category_businesses[]
+  photos              business_photos[]
+  reviews             reviews[]
+  tips                tips[]
 
-  @@index("idx_business_location", gist[location])
+  // @@index("idx_business_location", GIST[location])
 }
 
-model user {
-  id               String            @id @default(uuid())
+model users {
+  id               String             @id @default(uuid())
   password         String
   first_name       String?
   last_name        String?
-  email            String?           @unique
-  average_stars    Float             @default(0.0)
-  review_count     Int               @default(0)
-  user_since       DateTime          @default(now())
-  updated_at       DateTime          @default(now())
-  useful           Int               @default(0)
-  funny            Int               @default(0)
-  cool             Int               @default(0)
-  fans             Int               @default(0)
-  reviews          review[]
-  tips             tip[]
-  user_compliments user_compliment[]
-  user_friend      user_friend[]     @relation("User_Friend_Relation")
-  friends          user_friend[]
+  email            String?            @unique
+  average_stars    Float              @default(0.0)
+  review_count     Int                @default(0)
+  user_since       DateTime           @default(now())
+  updated_at       DateTime           @default(now())
+  useful           Int                @default(0)
+  funny            Int                @default(0)
+  cool             Int                @default(0)
+  fans             Int                @default(0)
+  reviews          reviews[]
+  tips             tips[]
+  user_compliments user_compliments[]
+  users_friends    user_friends[]     @relation("Users_Friends_Relation")
+  friends          user_friends[]
 }
 
-model user_friend {
+model user_friends {
   user_id       String
   friend_id     String
   friends_since DateTime @default(now())
-  friend        user     @relation("User_Friend_Relation", fields: [friend_id], references: [id], onDelete: Cascade)
-  user          user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  friend        users    @relation("Users_Friends_Relation", fields: [friend_id], references: [id], onDelete: Cascade)
+  user          users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@id([user_id, friend_id])
   @@index([user_id])
 }
 
-model user_compliment {
+model user_compliments {
   id      String          @id @default(uuid())
   user_id String
   type    compliment_type
   count   Int             @default(0)
-  user    user            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user    users           @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
 }
 
-model review {
-  id          String   @id @default(uuid())
+model reviews {
+  id          String     @id @default(uuid())
   stars       Int
   review_text String
-  useful      Int      @default(0)
-  funny       Int      @default(0)
-  cool        Int      @default(0)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now())
+  useful      Int        @default(0)
+  funny       Int        @default(0)
+  cool        Int        @default(0)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @default(now())
   author_id   String
   business_id String
-  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  author      users      @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business    businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique([author_id, business_id], name: "unique_author_review")
   @@index([author_id, created_at])
   @@index([business_id, created_at])
 }
 
-model category {
-  id                    String              @id @default(uuid())
-  name                  String              @unique
-  categories_businesses category_business[]
+model categories {
+  id                    String                @id @default(uuid())
+  name                  String                @unique
+  categories_businesses category_businesses[]
 }
 
-model category_business {
+model category_businesses {
   business_id String
   category_id String
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
-  category    category @relation(fields: [category_id], references: [id])
+  business    businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  category    categories @relation(fields: [category_id], references: [id])
 
   @@id([business_id, category_id])
   @@index([business_id])
 }
 
-model photo_business {
+model business_photos {
   id          String           @id @default(uuid())
   caption     String?
   label       photo_label_type
   business_id String
-  business    business         @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  business    businesses       @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@index([business_id])
 }
 
-model tip {
-  id          String   @id @default(uuid())
+model tips {
+  id          String     @id @default(uuid())
   tip_text    String
-  created_at  DateTime @default(now())
+  created_at  DateTime   @default(now())
   author_id   String
   business_id String
-  author      user     @relation(fields: [author_id], references: [id], onDelete: Cascade)
-  business    business @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  author      users      @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  business    businesses @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique([author_id, business_id])
   @@index([author_id, created_at])
@@ -138,7 +140,7 @@ model business_hours {
   day_of_week day_of_week
   open_time   DateTime    @db.Time(6)
   close_time  DateTime    @db.Time(6)
-  business    business    @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  business    businesses  @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@unique([business_id, day_of_week])
   @@index([business_id])
@@ -181,7 +183,7 @@ model business_attributes {
   good_for_meal                 attribute_good_for_meal[]
   hair_speciality               attribute_hair_speciality[]
   music                         attribute_music[]
-  business                      business                     @relation(fields: [business_id], references: [id], onDelete: Cascade)
+  businesses                    businesses                   @relation(fields: [business_id], references: [id], onDelete: Cascade)
 
   @@index([business_id])
 }

@@ -35,10 +35,10 @@ async function processCSV() {
   const total = records.length;
   console.log("Creating records..");
   while (records.length) {
-    const batch = records.splice(0, 100);
+    const batch = records.splice(0, 10);
     (async () => {
       try {
-        await prisma.user.createMany({
+        await prisma.users.createMany({
           data: batch,
           skipDuplicates: true,
         });

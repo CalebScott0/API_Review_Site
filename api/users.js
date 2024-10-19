@@ -1,11 +1,11 @@
 const express = require("express");
-const user_router = express.Router();
+const users_router = express.Router();
 
-const { getUserById } = require("../db/user");
-const { getReviewsForUser } = require("../db/review");
+const { getUserById } = require("../db/users");
+const { getReviewsForUser } = require("../db/reviews");
 
-// GET /api/user/
-user_router.get("/", async (req, res, next) => {
+// GET /api/users/me - get authenticated user
+users_router.get("/me", async (req, res, next) => {
   try {
     delete req.user.password;
 
@@ -15,10 +15,12 @@ user_router.get("/", async (req, res, next) => {
   }
 });
 
-// GET /api/user/:id
-user_router.get("/:id", async (req, res, next) => {
+// GET /api/users/:user_id
+users_router.get("/:user_id", async (req, res, next) => {
   try {
-    const user = (await getUserById(req.params.id))[0];
+    const id = req.params.user_id;
+
+    const user = (await getUserById(id))[0];
     // remove password before sending response
     delete user.password;
 
@@ -31,13 +33,13 @@ user_router.get("/:id", async (req, res, next) => {
   }
 });
 
-// GET /api/user/reviews/:id
-user_router.get("/reviews/:author_id", async (req, res, next) => {
+// GET /api/users/:user_id/reviews
+users_router.get("/:user_id/reviews", async (req, res, next) => {
   try {
-    const { author_id } = req.params;
+    const { user_id } = req.params;
     const { limit, offset } = req.query;
     const user_reviews = await getReviewsForUser({
-      author_id,
+      user_id,
       limit: +limit,
       offset: +offset,
     });
@@ -51,4 +53,4 @@ user_router.get("/reviews/:author_id", async (req, res, next) => {
   }
 });
 
-module.exports = user_router;
+module.exports = users_router;

@@ -1,12 +1,13 @@
 const prisma = require("./index");
 
 // ST_ASText to convert from geometry type to string
-const getBusinessById = (id) => {
+const getBusinessById = (business_id) => {
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
                           FROM business
-                          WHERE id = ${id}`;
+                          WHERE id = ${business_id}`;
 };
 
+// STORE THESE IN ENV
 // default coordinates Indianapolis, IN with default radius 10mi.
 const LATITUDE = 39.7683331;
 const LONGITUDE = -86.1583502;
@@ -38,9 +39,14 @@ const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
                           LIMIT ${limit} OFFSET ${offset};`;
 };
 
-const getBusinessHours = (id) => {
+const getBusinessHours = (business_id) => {
   return prisma.$queryRaw`SELECT day_of_week, close_time, open_time from business_hours
-                          WHERE business_id = ${id}`;
+                          WHERE business_id = ${business_id}`;
+};
+
+const getBusinessPhotos = (business_id) => {
+  return prisma.$queryRaw`SELECT * FROM business_photos
+                          WHERE business_id = ${business_id}`;
 };
 
 // return locations filtered with user search query
@@ -92,5 +98,6 @@ module.exports = {
   getBusinessById,
   getBusinessesByName,
   getBusinessHours,
+  getBusinessPhotos,
   updateBusiness,
 };

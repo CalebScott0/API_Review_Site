@@ -4,21 +4,21 @@ const {
   deleteReview,
   getReviewById,
   updateReview,
-} = require("../db/review");
+} = require("../db/reviews");
 const {
   checkCreateReviewData,
   checkIsUserReview,
   checkUpdateReviewData,
   checkUserHasReview,
 } = require("./__utils__/review_utils");
-const { getBusinessById, updateBusiness } = require("../db/business");
+const { getBusinessById, updateBusiness } = require("../db/businesses");
 const { averageBusinessStars, averageUserStars } = require("../db/utils");
-const { getUserById, updateUser } = require("../db/user");
+const { getUserById, updateUser } = require("../db/users");
 
-const review_router = express.Router();
+const reviews_router = express.Router();
 
-// POST /api/review/business/:business_id
-review_router.post(
+// POST /api/reviews/business/:business_id
+reviews_router.post(
   "/business/:business_id",
   // check if text & stars were provided
   checkCreateReviewData,
@@ -98,8 +98,8 @@ review_router.post(
 );
 
 // Include business Id in udpate/delete review endpoint url to not have to do another fetch from db
-// PUT api/review/:review_id/business/:business_id
-review_router.put(
+// PUT api/reviews/:review_id/business/:business_id
+reviews_router.put(
   "/:review_id/business/:business_id",
   // check user is author of this review
   checkIsUserReview,
@@ -174,8 +174,8 @@ review_router.put(
   }
 );
 
-// DELETE /api/review/:review_id/business/:business_id
-review_router.delete(
+// DELETE /api/reviews/:review_id/business/:business_id
+reviews_router.delete(
   "/:review_id/business/:business_id",
   // check user is author of this review
   checkIsUserReview,
@@ -233,4 +233,4 @@ review_router.delete(
   }
 );
 
-module.exports = review_router;
+module.exports = reviews_router;

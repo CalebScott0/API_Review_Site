@@ -33,7 +33,7 @@ async function processCSV() {
   const total = records.length;
   while (records.length > 0) {
     try {
-      await prisma.photo_business.createMany({
+      await prisma.business_photos.createMany({
         data: [...records.splice(0, BATCH_SIZE)],
         skipDuplicates: true,
       });

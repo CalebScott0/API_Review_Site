@@ -1,13 +1,13 @@
 const prisma = require("./index");
 
 const createReview = (data) => {
-  return prisma.review.create({ data });
+  return prisma.reviews.create({ data });
 };
 
 // will take a review id and a data object
 const updateReview = (id, data) => {
   {
-    return prisma.review.update({
+    return prisma.reviews.update({
       where: { id },
       data: {
         ...data,
@@ -18,13 +18,13 @@ const updateReview = (id, data) => {
 };
 
 const deleteReview = (id) => {
-  return prisma.review.delete({
+  return prisma.reviews.delete({
     where: { id },
   });
 };
 
 const getReviewById = (id) => {
-  return prisma.$queryRaw`SELECT * FROM review
+  return prisma.$queryRaw`SELECT * FROM reviews
                           WHERE id = ${id}`;
 };
 
@@ -33,27 +33,27 @@ const getReviewsForBusiness = ({ business_id, limit = 1, offset = 0 }) => {
   return prisma.$queryRaw`SELECT r.id, CONCAT(u.first_name, u.last_name) as author_name, r.author_id,
                           r.business_id, r.stars, r.review_text,
                           r.useful, r.funny, r.cool, r.created_at, r.updated_at
-                          FROM review r
-                          JOIN "user" u ON r.author_id = u.id
+                          FROM reviews r
+                          JOIN users u ON r.author_id = u.id
                           WHERE business_id = ${business_id}
                           ORDER BY created_at DESC
                           LIMIT ${limit} OFFSET ${offset}`;
 };
 
-const getReviewsForUser = ({ author_id, limit = 10, offset = 0 }) => {
+const getReviewsForUser = ({ user_id, limit = 10, offset = 0 }) => {
   return prisma.$queryRaw`SELECT r.id, CONCAT(u.first_name, u.last_name) as author_name, r.author_id,
                           r.business_id, r.stars, r.review_text,
                           r.useful, r.funny, r.cool, r.created_at, r.updated_at
-                          FROM review r
-                          JOIN "user" u ON r.author_id = u.id
-                          WHERE author_id = ${author_id}
+                          FROM reviews r
+                          JOIN users u ON r.author_id = u.id
+                          WHERE author_id = ${user_id}
                           ORDER BY created_at DESC
                           LIMIT ${limit} OFFSET ${offset}`;
 };
 
-const getUserReviewByBusiness = (author_id, business_id) => {
-  return prisma.$queryRaw`SELECT * FROM review
-                          WHERE author_id = ${author_id}
+const getUserReviewByBusiness = (user_id, business_id) => {
+  return prisma.$queryRaw`SELECT * FROM reviews
+                          WHERE author_id = ${user_id}
                           AND business_id = ${business_id}`;
 };
 

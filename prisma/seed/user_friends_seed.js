@@ -22,9 +22,10 @@ async function processCSV() {
 
     const user_friends = record[1].split(", ");
 
+    // TRY WITH A MAP?
     for (const friend_id of user_friends) {
       // if (!set.has(friend_id)) {
-      const friend_exists = await prisma.user.findUnique({
+      const friend_exists = await prisma.users.findUnique({
         where: { id: friend_id },
       });
       // }
@@ -45,7 +46,7 @@ async function processCSV() {
     const BATCH_SIZE = 10000;
     if (friends_array.length === BATCH_SIZE) {
       try {
-        await prisma.user_friend
+        await prisma.user_friends
           .createMany({
             data: [...friends_array.splice(0, friends_array.length)],
             skipDuplicates: true, // To avoid duplicates if the seeding is rerun
@@ -63,7 +64,7 @@ async function processCSV() {
   // remaining records
   if (friends_array.length > 0) {
     try {
-      await prisma.user_friend.createMany({
+      await prisma.user_friends.createMany({
         data: friends_array,
         skipDuplicates: true, // To avoid duplicates if the seeding is rerun
       });

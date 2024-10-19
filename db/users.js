@@ -1,21 +1,21 @@
 const prisma = require("./index");
 
 const createUser = (data) => {
-  return prisma.user.create({ data });
+  return prisma.users.create({ data });
 };
 
 const getUserById = (id) => {
-  return prisma.$queryRaw`SELECT * FROM "user"
+  return prisma.$queryRaw`SELECT * FROM users
                         WHERE id = ${id}`;
 };
 
 const getUserByEmail = (email) => {
-  return prisma.$queryRaw`SELECT * FROM "user"
+  return prisma.$queryRaw`SELECT * FROM users
                         WHERE email = ${email}`;
 };
 
 const updateUser = (id, data) => {
-  return prisma.user.update({
+  return prisma.users.update({
     where: { id },
     data,
   });

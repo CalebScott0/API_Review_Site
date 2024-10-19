@@ -80,7 +80,7 @@ async function processCSV() {
 
     if (create_batch.length === BATCH_SIZE) {
       try {
-        await prisma.user_compliment.createMany({
+        await prisma.user_compliments.createMany({
           data: [...create_batch.splice(0, BATCH_SIZE)],
           skipDuplicates: true,
         });
@@ -95,7 +95,7 @@ async function processCSV() {
   }
   if (create_batch.length > 0) {
     try {
-      await prisma.user_compliment.createMany({
+      await prisma.user_compliments.createMany({
         data: create_batch,
         skipDuplicates: true,
       });
