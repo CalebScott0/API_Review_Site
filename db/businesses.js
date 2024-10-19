@@ -44,11 +44,11 @@ const getBusinessPhotos = (business_id) => {
 };
 
 // return locations filtered with user search query
-const getBusinessesCityState = ({ query, limit = 5 }) => {
-  // if query includes a state
-  if (query?.indexOf(",") > 0) {
-    const city = query.slice(0, query.indexOf(","));
-    const state = query.slice(query.indexOf(",") + 1).trim();
+const getBusinessesCityState = ({ location, limit = 5 }) => {
+  // if location includes a state
+  if (location?.indexOf(",") > 0) {
+    const city = location.slice(0, location.indexOf(","));
+    const state = location.slice(location.indexOf(",") + 1).trim();
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
                             WHERE city ILIKE ${`${city}%`}
                             AND state ILIKE ${`${state}%`}
@@ -58,7 +58,7 @@ const getBusinessesCityState = ({ query, limit = 5 }) => {
   } else {
     // on input that does not yet include a state
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
-                            WHERE city ILIKE ${`${query}%`}
+                            WHERE city ILIKE ${`${location}%`}
                             GROUP BY city, state
                             ORDER  BY business_count DESC
                             LIMIT ${limit}`;
@@ -67,7 +67,7 @@ const getBusinessesCityState = ({ query, limit = 5 }) => {
 
 // for search, match businesses by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search
-const getBusinessesByName = ({ query = " ", limit = 3 }) => {
+const getBusinessesByName = ({ query, limit = 3 }) => {
   if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state

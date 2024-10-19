@@ -17,7 +17,7 @@ const getCategories = () => {
 // ORDER BY COUNT (BUSINESS_ID) TO GRAB TOP 3-4 OPTIONS
 // limit for search
 // ILIKE for case insensitive search
-const getCategoriesByName = ({ query = " ", limit = 5 }) => {
+const getCategoriesByName = ({ query, limit = 5 }) => {
   return prisma.$queryRaw`SELECT c.*, COUNT(cb.business_id)
                         FROM categories c
                         JOIN category_businesses cb ON c.id = cb.category_id

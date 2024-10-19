@@ -16,8 +16,8 @@ require("dotenv").config();
 // GET api/businesses/locations?query="" - returns unique combinations of city and state from db
 business_router.get("/locations", async (req, res, next) => {
   try {
-    const { query } = req.query;
-    let locations = await getBusinessesCityState({ query });
+    const { location } = req.query;
+    let locations = await getBusinessesCityState({ location });
     // remove big int count
     locations = locations.map(({ city, state }) => ({
       city,
