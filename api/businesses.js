@@ -27,8 +27,8 @@ business_router.get("/locations", async (req, res, next) => {
     // CREATE MAP FOR CITY AND CLEAN CITY NAME
 
     res.send({ locations });
-  } catch (error) {
-    next({ name: error.name, message: error.message });
+  } catch ({ name, message }) {
+    next({ name, message });
   }
 });
 

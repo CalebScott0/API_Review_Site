@@ -7,6 +7,7 @@ const { getCategories } = require("../db/categories");
 category_router.get("/", async (req, res, next) => {
   try {
     let categories = await getCategories();
+    // map remove count key from categories objects
     categories = categories.map(({ id, name }) => ({
       id,
       name,

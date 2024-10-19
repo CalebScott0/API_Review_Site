@@ -7,11 +7,6 @@ const {
 const express = require("express");
 const search_router = express.Router();
 
-const LATITUDE = 39.7683331;
-const LONGITUDE = -86.1583502;
-const RADIUS = 16093.4;
-// defaults for indiananopilis, put these in env!!!! and change in business db to env variable
-
 // get /api/search?search=""
 // get /api/search?location=""
 search_router.use("/", async (req, res, next) => {
@@ -52,8 +47,8 @@ search_router.use("/", async (req, res, next) => {
       res
         .status(400)
         .send({ error: "Please provide search or location query" });
-  } catch (error) {
-    next({ name: error.name, message: error.message });
+  } catch ({ name, message }) {
+    next({ name, message });
   }
 });
 

@@ -25,9 +25,9 @@ const getAllBusinessesFromLocation = ({
 };
 
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
-  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
+  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, ST_AsText(location) AS location
                           FROM businesses b
-                          JOIN category_business cb ON b.id = cb.business_id
+                          JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
                           ORDER BY review_count DESC, average_stars DESC
                           LIMIT ${limit} OFFSET ${offset};`;
