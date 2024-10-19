@@ -19,6 +19,11 @@ search_router.get("/businesses_and_categories", async (req, res, next) => {
       getCategoriesByName({ query }),
       getBusinessesByName({ query }),
     ]);
+    if (!categories.length && !businesses.length) {
+      return res
+        .status(400)
+        .send({ error: "Invalid business or category search parameter" });
+    }
     // // remove BigInt count of business from sql query needed for order by
     categories = categories.map(({ id, name }) => {
       return {
@@ -43,6 +48,11 @@ search_router.get("/locations", async (req, res, next) => {
     // limits to 5 by default in return
     let locations = await getBusinessesCityState({ location });
     // remove big int count
+    if (!locations.length) {
+      return res
+        .status(400)
+        .send({ error: "Invalid location search parameter" });
+    }
     locations = locations.map(({ city, state }) => ({
       city,
       state,
@@ -53,4 +63,5 @@ search_router.get("/locations", async (req, res, next) => {
     next({ name, message });
   }
 });
+
 module.exports = search_router;
