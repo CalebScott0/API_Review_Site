@@ -64,4 +64,36 @@ search_router.get("/locations", async (req, res, next) => {
   }
 });
 
+// api/search
+search_router.get("/businesses_and_categories", async (req, res, next) => {
+  try {
+    // combined search endpoint for locations and "search" -> businesses/categories
+    const { query } = req.query;
+    // grab several categories and businesses with user query, compares with LIKE %query%
+    // business only returns once query length > 2
+    // 5 categories, 3 businesses
+    let [categories, businesses] = await Promise.all([
+      getCategoriesByName({ query }),
+      getBusinessesByName({ query }),
+    ]);
+    if (!categories.length && !businesses.length) {
+      return res
+        .status(400)
+        .send({ error: "Invalid business or category search parameter" });
+    }
+    // // remove BigInt count of business from sql query needed for order by
+    categories = categories.map(({ id, name }) => {
+      return {
+        id,
+        name,
+      };
+    });
+    const search_results = { categories: categories, businesses: businesses };
+
+    res.send({ search_results });
+  } catch ({ name, message }) {
+    next({ name, message });
+  }
+});
+
 module.exports = search_router;
