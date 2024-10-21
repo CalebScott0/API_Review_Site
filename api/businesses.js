@@ -3,6 +3,7 @@ const business_router = express.Router();
 const {
   getAllBusinessesFromLocation,
   getBusinessesByCategory,
+  getBusinessesByCategoryFromLocation,
   getBusinessesCityState,
   getBusinessById,
   getBusinessHours,
@@ -79,41 +80,92 @@ business_router.get("/nearby", async (req, res, next) => {
 });
 
 // Get a list of businesses with a given category_id
-// GET /api/businesses/categories/:category_id?limit={}&offset={}
+// GET /api/businesses/categories/:category_id?city=""&state=""&limit={}&offset={}
 business_router.get("/categories/:category_id", async (req, res, next) => {
-  try {
-    const { category_id } = req.params;
-    const { limit, offset } = req.query;
-    const fetch_businesses = await getBusinessesByCategory({
-      category_id,
-      limit: +limit,
-      offset: +offset,
-    });
-    const businesses = await Promise.all(
-      // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
-      // get categories for business
-      fetch_businesses.map(async (business) => {
-        // let [business_hours, categories] = await Promise.all([
-        let [review, business_hours, categories] = await Promise.all([
-          getReviewsForBusiness({ business_id: business.id }),
-          getBusinessHours(business.id),
-          getCategoriesForBusiness(business.id),
-        ]);
-        return {
-          ...business,
-          hours: business_hours,
-          categories,
-          recent_review: review[0],
-        };
-      })
-    );
+  const { category_id } = req.params;
+  const { city, state, limit, offset } = req.query;
+  // if no location provided. i.e general category search
+  if (!city && !state) {
+    try {
+      const fetch_businesses = await getBusinessesByCategory({
+        category_id,
+        limit: +limit,
+        offset: +offset,
+      });
+      const businesses = await Promise.all(
+        // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
+        // get categories for business
+        fetch_businesses.map(async (business) => {
+          // let [business_hours, categories] = await Promise.all([
+          let [review, business_hours, categories] = await Promise.all([
+            getReviewsForBusiness({ business_id: business.id }),
+            getBusinessHours(business.id),
+            getCategoriesForBusiness(business.id),
+          ]);
+          return {
+            ...business,
+            hours: business_hours,
+            categories,
+            recent_review: review[0],
+          };
+        })
+      );
+      res.send({ businesses });
+    } catch (error) {
+      next({
+        name: "BusinessByCategoryFetchError",
+        message:
+          "Unable to find businesses by category, check category id is valid",
+      });
+    }
+  } else if (city && state) {
+    try {
+      // make call to location iq api with req query city and state, returns 1
+      const url = `https://us1.locationiq.com/v1/search/structured?city=${city}&state=${state}&format=json&limit=1&key=${process.env.LOCATION_API_KEY}`;
+      const options = {
+        method: "GET",
+        headers: { accept: "application/json" },
+      };
+      // use node fetch to call location iq api
+      const location_response = await fetch(url, options);
+      const json = await location_response.json();
+      // pass longitude and latitude from location iq to get list of businesses ordered by
+      // distance from target coordinates
+      const fetch_businesses = await getBusinessesByCategoryFromLocation({
+        category_id,
+        limit: +limit,
+        offset: +offset,
+        longitude: +json[0].lon,
+        latitude: +json[0].lat,
+      });
 
-    res.send({ businesses });
-  } catch (error) {
+      const businesses = await Promise.all(
+        // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
+        // get categories / hours for business
+        fetch_businesses.map(async (business) => {
+          let [review, business_hours, categories] = await Promise.all([
+            getReviewsForBusiness({ business_id: business.id }),
+            getBusinessHours(business.id),
+            getCategoriesForBusiness(business.id),
+          ]);
+          return {
+            ...business,
+            hours: business_hours,
+            categories,
+            recent_review: review[0],
+          };
+        })
+      );
+
+      res.send({ businesses });
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
+  } else {
+    // if only one city or state was provided in query
     next({
       name: "BusinessByCategoryFetchError",
-      message:
-        "Unable to find businesses by category, check category id is valid",
+      message: "Please provide both city and state for a location search",
     });
   }
 });

@@ -18,19 +18,41 @@ const getAllBusinessesFromLocation = ({
   // wrap location in ST_AsText to turn geometry type into string
   // where (spacial type) distance is within a rxadius from the created spatial reference system id geo point from input lat and lon, 4326 = coordinate system,
   //LONGITUDE BEFORE LATITUDE IN SPATIAL QUERIES WHERE YOU MAKE A POINT
-  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location FROM businesses
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, longitude, latitude
+                          FROM businesses
                           WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${longitude},${latitude}), 4326), ${radius}) 
-                          ORDER BY review_count DESC, average_stars DESC
+                          ORDER BY review_count DESC
                           LIMIT ${limit} OFFSET ${offset};`;
 };
 
-const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
-  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, ST_AsText(location) AS location
+const getBusinessesByCategoryFromLocation = ({
+  category_id,
+  longitude,
+  latitude,
+  limit = 10,
+  offset = 0,
+}) => {
+  // ST_DistanceSphere to calculate distance from target coordinates - return will be in meters
+  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, b.longitude, b.latitude,
+                          ST_DistanceSphere(ST_MakePoint(${longitude}, ${latitude}), ST_ASText(location)::geometry)
+                          AS distance_from_location
                           FROM businesses b
                           JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
                           ORDER BY review_count DESC, average_stars DESC
                           LIMIT ${limit} OFFSET ${offset};`;
+};
+
+// Use this for the filter by highest review count!
+// ADD ANOTHER FOR FILTER BY AVERAGE STARS FOR BEST BUSINESSES
+//     YOU WOULD HAVE TO CHANGE BUSINESSES BACK TO ROUDNED TO NEAREST HALF FOR AVERAGES STARS IN DB FOR THIS TO BE EFFECTIVE
+const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
+  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, ST_AsText(location) AS location
+                            FROM businesses b
+                            JOIN category_businesses cb ON b.id = cb.business_id
+                            WHERE cb.category_id = ${category_id}
+                            ORDER BY review_count DESC, average_stars DESC
+                            LIMIT ${limit} OFFSET ${offset};`;
 };
 
 const getBusinessHours = (business_id) => {
@@ -89,6 +111,7 @@ module.exports = {
   getAllBusinessesFromLocation,
   getBusinessesCityState,
   getBusinessesByCategory,
+  getBusinessesByCategoryFromLocation,
   getBusinessById,
   getBusinessesByName,
   getBusinessHours,
