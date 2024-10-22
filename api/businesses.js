@@ -80,6 +80,8 @@ business_router.get("/locations", async (req, res, next) => {
 // });
 
 // Get a list of businesses with a given category_id
+// options to add city and state query filters - return will be ordered by distance
+// from location
 // GET /api/businesses/categories/:category_id?city=""&state=""&limit={}&offset={}
 business_router.get("/categories/:category_id", async (req, res, next) => {
   const { category_id } = req.params;
@@ -87,13 +89,14 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
   // if no location provided. i.e general category search
   if (!city && !state) {
     try {
+      // return ordered by review_count desc
       const fetch_businesses = await getBusinessesByCategory({
         category_id,
         limit: +limit,
         offset: +offset,
       });
       const businesses = await Promise.all(
-        // Get most recent review for busienss (review db query limits to 1 on default and ordered by created_at)
+        // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories for business
         fetch_businesses.map(async (business) => {
           // let [business_hours, categories] = await Promise.all([

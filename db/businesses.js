@@ -7,6 +7,7 @@ const getBusinessById = (business_id) => {
                           WHERE id = ${business_id}`;
 };
 
+// would be used for businesses within a radius (currently does not have category filter)
 const getAllBusinessesFromLocation = ({
   longitude,
   latitude,
@@ -39,7 +40,7 @@ const getBusinessesByCategoryFromLocation = ({
                           FROM businesses b
                           JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
-                          ORDER BY review_count DESC, average_stars DESC
+                          ORDER BY distance_from_location ASC
                           LIMIT ${limit} OFFSET ${offset};`;
 };
 
@@ -51,7 +52,7 @@ const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
                             FROM businesses b
                             JOIN category_businesses cb ON b.id = cb.business_id
                             WHERE cb.category_id = ${category_id}
-                            ORDER BY review_count DESC, average_stars DESC
+                            ORDER BY review_count DESC
                             LIMIT ${limit} OFFSET ${offset};`;
 };
 
@@ -95,7 +96,7 @@ const getBusinessesByName = ({ query, limit = 3 }) => {
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
                           FROM businesses
                           WHERE "name" ILIKE ${`${query}%`}
-                          ORDER BY review_count DESC, average_stars DESC
+                          ORDER BY review_count DESC
                           LIMIT ${limit}`;
 };
 
