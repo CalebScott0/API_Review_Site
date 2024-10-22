@@ -2,7 +2,7 @@ const prisma = require("./index");
 
 // ST_ASText to convert from geometry type to string
 const getBusinessById = (business_id) => {
-  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, ST_AsText(location) AS location 
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, postal_code, state, is_open, longitude, latitude 
                           FROM businesses
                           WHERE id = ${business_id}`;
 };
@@ -48,7 +48,7 @@ const getBusinessesByCategoryFromLocation = ({
 // ADD ANOTHER FOR FILTER BY AVERAGE STARS FOR BEST BUSINESSES
 //     YOU WOULD HAVE TO CHANGE BUSINESSES BACK TO ROUDNED TO NEAREST HALF FOR AVERAGES STARS IN DB FOR THIS TO BE EFFECTIVE
 const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
-  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, ST_AsText(location) AS location
+  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, b.longitude, b.latitude
                             FROM businesses b
                             JOIN category_businesses cb ON b.id = cb.business_id
                             WHERE cb.category_id = ${category_id}
