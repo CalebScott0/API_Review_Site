@@ -1,7 +1,7 @@
 const express = require("express");
 const business_router = express.Router();
 const {
-  getAllBusinessesFromLocation,
+  getBusinessesFromLocation,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessesCityState,
@@ -48,7 +48,7 @@ business_router.get("/locations", async (req, res, next) => {
 //     const json = await location_response.json();
 //     // pass longitude and latitude from location iq to get all businesses from location function
 //     // default radius parameter of 10miles converted to kilometers
-//     const fetch_businesses = await getAllBusinessesFromLocation({
+//     const fetch_businesses = await getBusinessesFromLocation({
 //       limit: +limit,
 //       offset: +offset,
 //       longitude: +json[0].lon,
@@ -86,6 +86,7 @@ business_router.get("/locations", async (req, res, next) => {
 business_router.get("/categories/:category_id", async (req, res, next) => {
   const { category_id } = req.params;
   const { city, state, limit, offset } = req.query;
+  console.log(city, state);
   // if no location provided. i.e general category search
   if (!city && !state) {
     try {

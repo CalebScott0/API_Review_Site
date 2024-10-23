@@ -8,7 +8,7 @@ const getBusinessById = (business_id) => {
 };
 
 // would be used for businesses within a radius (currently does not have category filter)
-const getAllBusinessesFromLocation = ({
+const getBusinessesFromLocation = ({
   longitude,
   latitude,
   // default radius 10mi - in km
@@ -109,12 +109,12 @@ const updateBusiness = (id, data) => {
 };
 
 module.exports = {
-  getAllBusinessesFromLocation,
   getBusinessesCityState,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
   getBusinessesByName,
+  getBusinessesFromLocation,
   getBusinessHours,
   getBusinessPhotos,
   updateBusiness,
