@@ -112,10 +112,10 @@ module.exports = {
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
+  getBusinessesByName,
   getBusinessesFromLocation,
+  getCityStateFromBusinesses,
   getHoursForBusiness,
   getPhotosForBusiness,
-  getBusinessesByName,
-  getCityStateFromBusinesses,
   updateBusiness,
 };
