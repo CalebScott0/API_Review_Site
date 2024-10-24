@@ -56,18 +56,18 @@ const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
                             LIMIT ${limit} OFFSET ${offset};`;
 };
 
-const getBusinessHours = (business_id) => {
+const getHoursForBusiness = (business_id) => {
   return prisma.$queryRaw`SELECT day_of_week, close_time, open_time from business_hours
                           WHERE business_id = ${business_id}`;
 };
 
-const getBusinessPhotos = (business_id) => {
-  return prisma.$queryRaw`SELECT * FROM business_photos
+const getPhotosForBusiness = (business_id) => {
+  return prisma.$queryRaw`SELECT id, caption, label FROM business_photos
                           WHERE business_id = ${business_id}`;
 };
 
 // return locations filtered with user search query
-const getBusinessesCityState = ({ location, limit = 5 }) => {
+const matchCityStateFromBusinesses = ({ location, limit = 5 }) => {
   // if location includes a state
   if (location?.indexOf(",") > 0) {
     const city = location.slice(0, location.indexOf(","));
@@ -109,13 +109,13 @@ const updateBusiness = (id, data) => {
 };
 
 module.exports = {
-  getBusinessesCityState,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
   getBusinessesByName,
+  matchCityStateFromBusinesses,
   getBusinessesFromLocation,
-  getBusinessHours,
-  getBusinessPhotos,
+  getHoursForBusiness,
+  getPhotosForBusiness,
   updateBusiness,
 };

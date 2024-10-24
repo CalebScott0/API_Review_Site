@@ -4,10 +4,10 @@ const {
   getBusinessesFromLocation,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
-  getBusinessesCityState,
   getBusinessById,
-  getBusinessHours,
-  getBusinessPhotos,
+  getHoursForBusiness,
+  getPhotosForBusiness,
+  matchCityStateFromBusinesses,
 } = require("../db/businesses");
 const { getCategoriesForBusiness } = require("../db/categories");
 const { getReviewsForBusiness } = require("../db/reviews");
@@ -18,7 +18,7 @@ require("dotenv").config();
 business_router.get("/locations", async (req, res, next) => {
   try {
     const { location } = req.query;
-    let locations = await getBusinessesCityState({ location });
+    let locations = await matchCityStateFromBusinesses({ location });
     // remove big int count
     locations = locations.map(({ city, state }) => ({
       city,
@@ -61,7 +61,7 @@ business_router.get("/locations", async (req, res, next) => {
 //       fetch_businesses.map(async (business) => {
 //         let [review, business_hours, categories] = await Promise.all([
 //           getReviewsForBusiness({ business_id: business.id }),
-//           getBusinessHours(business.id),
+//           getHoursForBusiness(business.id),
 //           getCategoriesForBusiness(business.id),
 //         ]);
 //         return {
@@ -101,16 +101,18 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
         // get categories for business
         fetch_businesses.map(async (business) => {
           // let [business_hours, categories] = await Promise.all([
-          let [review, business_hours, categories] = await Promise.all([
-            getReviewsForBusiness({ business_id: business.id }),
-            getBusinessHours(business.id),
+          let [hours, categories, photos, reviews] = await Promise.all([
+            getHoursForBusiness(business.id),
             getCategoriesForBusiness(business.id),
+            getPhotosForBusiness(business.id),
+            getReviewsForBusiness({ business_id: business.id }),
           ]);
           return {
             ...business,
-            hours: business_hours,
+            hours,
             categories,
-            recent_review: review[0],
+            photos,
+            recent_review: reviews[0],
           };
         })
       );
@@ -147,16 +149,18 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
         // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories / hours for business
         fetch_businesses.map(async (business) => {
-          let [review, business_hours, categories] = await Promise.all([
-            getReviewsForBusiness({ business_id: business.id }),
-            getBusinessHours(business.id),
+          let [hours, categories, photos, reviews] = await Promise.all([
+            getHoursForBusiness(business.id),
             getCategoriesForBusiness(business.id),
+            getPhotosForBusiness(business.id),
+            getReviewsForBusiness({ business_id: business.id }),
           ]);
           return {
             ...business,
-            hours: business_hours,
+            hours,
             categories,
-            recent_review: review[0],
+            photos,
+            recent_review: reviews[0],
           };
         })
       );
@@ -199,7 +203,7 @@ business_router.get("/:business_id/reviews", async (req, res, next) => {
 business_router.get("/:business_id/photos", async (req, res, next) => {
   const { business_id } = req.params;
   try {
-    const photos = await getBusinessPhotos(business_id);
+    const photos = await getPhotosForBusiness(business_id);
 
     res.send({ photos });
   } catch (error) {
@@ -214,15 +218,17 @@ business_router.get("/:business_id/photos", async (req, res, next) => {
 business_router.get("/:business_id", async (req, res, next) => {
   try {
     const { business_id } = req.params;
-    let [business, business_hours, categories] = await Promise.all([
+    let [business, hours, photos, categories] = await Promise.all([
       getBusinessById(business_id),
-      getBusinessHours(business_id),
+      getHoursForBusiness(business_id),
+      getPhotosForBusiness(business_id),
       getCategoriesForBusiness(business_id),
     ]);
     if (categories.length) {
       business = {
         ...business[0],
-        hours: business_hours,
+        hours,
+        photos,
         categories,
       };
       // throws error in endpoint
