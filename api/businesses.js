@@ -82,6 +82,7 @@ business_router.get("/locations", async (req, res, next) => {
 // Get a list of businesses with a given category_id
 // options to add city and state query filters - return will be ordered by distance
 // from location
+
 // GET /api/businesses/categories/:category_id?city=""&state=""&limit={}&offset={}
 business_router.get("/categories/:category_id", async (req, res, next) => {
   const { category_id } = req.params;
@@ -218,18 +219,18 @@ business_router.get("/:business_id/photos", async (req, res, next) => {
 business_router.get("/:business_id", async (req, res, next) => {
   try {
     const { business_id } = req.params;
-    let [business, hours, photos, categories] = await Promise.all([
+    let [business, hours, categories, photos] = await Promise.all([
       getBusinessById(business_id),
       getHoursForBusiness(business_id),
-      getPhotosForBusiness(business_id),
       getCategoriesForBusiness(business_id),
+      getPhotosForBusiness(business_id),
     ]);
     if (categories.length) {
       business = {
         ...business[0],
         hours,
-        photos,
         categories,
+        photos,
       };
       // throws error in endpoint
     } else {
