@@ -7,7 +7,7 @@ const {
   getBusinessById,
   getHoursForBusiness,
   getPhotosForBusiness,
-  matchCityStateFromBusinesses,
+  getCityStateFromBusinesses,
 } = require("../db/businesses");
 const { getCategoriesForBusiness } = require("../db/categories");
 const { getReviewsForBusiness } = require("../db/reviews");
@@ -18,7 +18,8 @@ require("dotenv").config();
 business_router.get("/locations", async (req, res, next) => {
   try {
     const { location } = req.query;
-    let locations = await matchCityStateFromBusinesses({ location });
+    // matches with Ilike sql query
+    let locations = await getCityStateFromBusinesses({ location });
     // remove big int count
     locations = locations.map(({ city, state }) => ({
       city,
@@ -127,7 +128,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
     }
   } else if (city && state) {
     try {
-      // make call to location iq api with req query city and state, returns 1
+      // make call to location iq api with req query's city and state, returns 1
       const url = `https://us1.locationiq.com/v1/search/structured?city=${city}&state=${state}&format=json&limit=1&key=${process.env.LOCATION_API_KEY}`;
       const options = {
         method: "GET",

@@ -2,7 +2,7 @@ const { getCategoriesByName } = require("../db/categories");
 
 const {
   getBusinessesByName,
-  getBusinessesCityState,
+  getCityStateFromBusinesses,
 } = require("../db/businesses");
 const express = require("express");
 const search_router = express.Router();
@@ -57,7 +57,7 @@ search_router.get("/locations", async (req, res, next) => {
   try {
     const { location } = req.query;
     // limits to 5 by default in return
-    let locations = await getBusinessesCityState({ location });
+    let locations = await getCityStateFromBusinesses({ location });
     // remove big int count
     if (!locations.length) {
       return res

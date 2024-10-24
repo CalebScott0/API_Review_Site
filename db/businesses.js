@@ -67,7 +67,7 @@ const getPhotosForBusiness = (business_id) => {
 };
 
 // return locations filtered with user search query
-const matchCityStateFromBusinesses = ({ location, limit = 5 }) => {
+const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
   // if location includes a state
   if (location?.indexOf(",") > 0) {
     const city = location.slice(0, location.indexOf(","));
@@ -112,10 +112,10 @@ module.exports = {
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
-  getBusinessesByName,
-  matchCityStateFromBusinesses,
   getBusinessesFromLocation,
   getHoursForBusiness,
   getPhotosForBusiness,
+  getBusinessesByName,
+  getCityStateFromBusinesses,
   updateBusiness,
 };
