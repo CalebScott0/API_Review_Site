@@ -1,3 +1,7 @@
+// photos from aws S3
+const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+
 const express = require("express");
 const business_router = express.Router();
 const {
@@ -14,6 +18,32 @@ const { getReviewsForBusiness } = require("../db/reviews");
 const { roundHalf } = require("../db/utils");
 const fetch = require("node-fetch");
 require("dotenv").config();
+
+// new s3 client
+const s3Client = new S3Client({
+  region: process.env.AWS_region,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
+// generate signed url for photo access from s3 bucket
+const generateSignedUrl = async (id) => {
+  try {
+    // add .jpg to key for images from s3 bucket
+    let key = `${id}.jpg`;
+    const command = new GetObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET,
+      Key: key,
+    });
+    //60 second url expiration
+    const signed_url = await getSignedUrl(s3Client, command, { expiresIn: 60 }); // URL expires in 60 seconds
+    return signed_url;
+  } catch (error) {
+    throw error;
+  }
+};
 
 // GET api/businesses/locations?query="" - returns unique combinations of city and state from db
 business_router.get("/locations", async (req, res, next) => {
@@ -109,6 +139,20 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
             getPhotosForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
           ]);
+          // map photos with signed url from aws
+          photos = await Promise.all(
+            photos.map(async (photo) => {
+              // destructure fields of photo
+              const { id, caption, label } = photo;
+              // generate signed url with key - id
+              const signed_url = await generateSignedUrl(id);
+              return {
+                signed_url,
+                caption,
+                label,
+              };
+            })
+          );
           return {
             ...business,
             // round average stars to nearest half before sending response
@@ -159,6 +203,20 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
             getPhotosForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
           ]);
+          // map photos with signed url from aws
+          photos = await Promise.all(
+            photos.map(async (photo) => {
+              // destructure fields of photo
+              const { id, caption, label } = photo;
+              // generate signed url with key - id
+              const signed_url = await generateSignedUrl(id);
+              return {
+                signed_url,
+                caption,
+                label,
+              };
+            })
+          );
           return {
             ...business,
             // round average stars to nearest half before sending response
@@ -230,6 +288,20 @@ business_router.get("/:business_id", async (req, res, next) => {
       getCategoriesForBusiness(business_id),
       getPhotosForBusiness(business_id),
     ]);
+    // map photos with signed url from aws
+    photos = await Promise.all(
+      photos.map(async (photo) => {
+        // destructure fields of photo
+        const { id, caption, label } = photo;
+        // generate signed url with key - id
+        const signed_url = await generateSignedUrl(id);
+        return {
+          signed_url,
+          caption,
+          label,
+        };
+      })
+    );
     if (categories.length) {
       business = {
         ...business[0],
