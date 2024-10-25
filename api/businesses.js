@@ -111,6 +111,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           ]);
           return {
             ...business,
+            // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
             hours,
             categories,
@@ -160,6 +161,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           ]);
           return {
             ...business,
+            // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
             hours,
             categories,
@@ -231,6 +233,7 @@ business_router.get("/:business_id", async (req, res, next) => {
     if (categories.length) {
       business = {
         ...business[0],
+        // round average stars to nearest half before sending response
         average_stars: roundHalf(business[0].average_stars),
         hours,
         categories,
