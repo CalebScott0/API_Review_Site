@@ -89,7 +89,6 @@ business_router.get("/locations", async (req, res, next) => {
 business_router.get("/categories/:category_id", async (req, res, next) => {
   const { category_id } = req.params;
   const { city, state, limit, offset } = req.query;
-  console.log(city, state);
   // if no location provided. i.e general category search
   if (!city && !state) {
     try {
@@ -161,6 +160,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           ]);
           return {
             ...business,
+            average_stars: roundHalf(business.average_stars),
             hours,
             categories,
             photos,
@@ -231,6 +231,7 @@ business_router.get("/:business_id", async (req, res, next) => {
     if (categories.length) {
       business = {
         ...business[0],
+        average_stars: roundHalf(business[0].average_stars),
         hours,
         categories,
         photos,
