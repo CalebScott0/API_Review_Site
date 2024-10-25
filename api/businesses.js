@@ -11,6 +11,7 @@ const {
 } = require("../db/businesses");
 const { getCategoriesForBusiness } = require("../db/categories");
 const { getReviewsForBusiness } = require("../db/reviews");
+const { roundHalf } = require("../db/utils");
 const fetch = require("node-fetch");
 require("dotenv").config();
 
@@ -111,6 +112,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           ]);
           return {
             ...business,
+            average_stars: roundHalf(business.average_stars),
             hours,
             categories,
             photos,
