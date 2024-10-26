@@ -1,7 +1,3 @@
-// photos from aws S3
-const { S3Client, GetObjectCommand } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-
 const express = require("express");
 const business_router = express.Router();
 const {
@@ -18,34 +14,6 @@ const { getReviewsForBusiness } = require("../db/reviews");
 const { roundHalf } = require("../db/utils");
 const fetch = require("node-fetch");
 require("dotenv").config();
-
-// new s3 client
-const s3Client = new S3Client({
-  region: process.env.AWS_region,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-});
-
-// generate signed url for photo access from s3 bucket
-const generateSignedUrl = async (id) => {
-  try {
-    // add .jpg to key for images from s3 bucket
-    let key = `${id}.jpg`;
-    const command = new GetObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET,
-      Key: key,
-    });
-    //60 second url expiration
-    const signed_url = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600,
-    }); // URL expires in 1 hr
-    return signed_url;
-  } catch (error) {
-    throw error;
-  }
-};
 
 // GET api/businesses/locations?query="" - returns unique combinations of city and state from db
 business_router.get("/locations", async (req, res, next) => {
@@ -135,33 +103,18 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
         // get categories for business
         fetch_businesses.map(async (business) => {
           // let [business_hours, categories] = await Promise.all([
-          let [hours, categories, photos, reviews] = await Promise.all([
+          let [hours, categories, reviews] = await Promise.all([
             getHoursForBusiness(business.id),
             getCategoriesForBusiness(business.id),
-            getPhotosForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
           ]);
-          // map photos with signed url from aws
-          photos = await Promise.all(
-            photos.map(async (photo) => {
-              // destructure fields of photo
-              const { id, caption, label } = photo;
-              // generate signed url with key - id
-              const signed_url = await generateSignedUrl(id);
-              return {
-                signed_url,
-                caption,
-                label,
-              };
-            })
-          );
+
           return {
             ...business,
             // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
             hours,
             categories,
-            photos,
             recent_review: reviews[0],
           };
         })
@@ -199,38 +152,18 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
         // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories / hours for business
         fetch_businesses.map(async (business) => {
-          let [
-            hours,
-            categories,
-            //  photos,
-            reviews,
-          ] = await Promise.all([
+          let [hours, categories, reviews] = await Promise.all([
             getHoursForBusiness(business.id),
             getCategoriesForBusiness(business.id),
-            // getPhotosForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
           ]);
-          // map photos with signed url from aws
-          // photos = await Promise.all(
-          //   photos.map(async (photo) => {
-          //     // destructure fields of photo
-          //     const { id, caption, label } = photo;
-          //     // generate signed url with key - id
-          //     const signed_url = await generateSignedUrl(id);
-          //     return {
-          //       signed_url,
-          //       caption,
-          //       label,
-          //     };
-          //   })
-          // );
+
           return {
             ...business,
             // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
             hours,
             categories,
-            // photos,
             recent_review: reviews[0],
           };
         })
@@ -249,66 +182,15 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
   }
 });
 
-// GET api/businesses/:business_id/reviews?limit={}&offset={}
-business_router.get("/:business_id/reviews", async (req, res, next) => {
-  const { business_id } = req.params;
-  const { limit, offset } = req.query;
-  try {
-    const reviews = await getReviewsForBusiness({
-      business_id,
-      // parse to int as they will be string from req
-      limit: +limit,
-      offset: +offset,
-    });
-
-    res.send({ reviews });
-  } catch (error) {
-    next({
-      name: "ReviewFetchError",
-      message: "Unable to fetch reviews for business",
-    });
-  }
-});
-
-// GET api/businesses/:business_id/photos
-business_router.get("/:business_id/photos", async (req, res, next) => {
-  const { business_id } = req.params;
-  try {
-    const photos = await getPhotosForBusiness(business_id);
-
-    res.send({ photos });
-  } catch (error) {
-    next({
-      name: "PhotoFetchError",
-      message: "Unable to fetch photos for business",
-    });
-  }
-});
-
 // GET /api/businesses/:business_id
 business_router.get("/:business_id", async (req, res, next) => {
   try {
     const { business_id } = req.params;
-    let [business, hours, categories, photos] = await Promise.all([
+    let [business, hours, categories] = await Promise.all([
       getBusinessById(business_id),
       getHoursForBusiness(business_id),
       getCategoriesForBusiness(business_id),
-      getPhotosForBusiness(business_id),
     ]);
-    // map photos with signed url from aws
-    photos = await Promise.all(
-      photos.map(async (photo) => {
-        // destructure fields of photo
-        const { id, caption, label } = photo;
-        // generate signed url with key - id
-        const signed_url = await generateSignedUrl(id);
-        return {
-          signed_url,
-          caption,
-          label,
-        };
-      })
-    );
     if (categories.length) {
       business = {
         ...business[0],
@@ -316,7 +198,6 @@ business_router.get("/:business_id", async (req, res, next) => {
         average_stars: roundHalf(business[0].average_stars),
         hours,
         categories,
-        photos,
       };
       // throws error in endpoint
     } else {

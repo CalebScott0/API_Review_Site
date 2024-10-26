@@ -56,7 +56,10 @@ api_router.use("/reviews", requireUser, require("./reviews"));
 // /api/search
 api_router.use("/search", require("./search"));
 
+// /api/photos
+api_router.use("/photos", require("./photos"));
+
 // /api/categories
-api_router.use("/categories", require("./categories"));
+// api_router.use("/categories", require("./categories"));
 
 module.exports = api_router;
