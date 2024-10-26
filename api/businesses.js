@@ -207,7 +207,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           ]);
           // map photos with signed url from aws
           photos = await Promise.all(
-            photos.slice(0, 5).map(async (photo) => {
+            photos.map(async (photo) => {
               // destructure fields of photo
               const { id, caption, label } = photo;
               // generate signed url with key - id
