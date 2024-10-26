@@ -199,33 +199,37 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
         // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories / hours for business
         fetch_businesses.map(async (business) => {
-          let [hours, categories, photos, reviews] = await Promise.all([
+          let [hours, categories, reviews] = await Promise.all([
             getHoursForBusiness(business.id),
             getCategoriesForBusiness(business.id),
-            getPhotosForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
+            // let [hours, categories, photos, reviews] = await Promise.all([
+            //   getHoursForBusiness(business.id),
+            //   getCategoriesForBusiness(business.id),
+            //   getPhotosForBusiness(business.id),
+            //   getReviewsForBusiness({ business_id: business.id }),
           ]);
           // map photos with signed url from aws
-          photos = await Promise.all(
-            photos.map(async (photo) => {
-              // destructure fields of photo
-              const { id, caption, label } = photo;
-              // generate signed url with key - id
-              const signed_url = await generateSignedUrl(id);
-              return {
-                signed_url,
-                caption,
-                label,
-              };
-            })
-          );
+          // photos = await Promise.all(
+          //   photos.map(async (photo) => {
+          //     // destructure fields of photo
+          //     const { id, caption, label } = photo;
+          //     // generate signed url with key - id
+          //     const signed_url = await generateSignedUrl(id);
+          //     return {
+          //       signed_url,
+          //       caption,
+          //       label,
+          //     };
+          //   })
+          // );
           return {
             ...business,
             // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
             hours,
             categories,
-            photos,
+            // photos,
             recent_review: reviews[0],
           };
         })
