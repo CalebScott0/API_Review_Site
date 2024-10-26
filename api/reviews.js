@@ -234,25 +234,4 @@ reviews_router.delete(
   }
 );
 
-// GET api/reviews/business/:business_id?limit={}&offset={}
-reviews_router.get("/business/:business_id", async (req, res, next) => {
-  const { business_id } = req.params;
-  const { limit, offset } = req.query;
-  try {
-    const reviews = await getReviewsForBusiness({
-      business_id,
-      // parse to int as they will be string from req
-      limit: +limit,
-      offset: +offset,
-    });
-
-    res.send({ reviews });
-  } catch (error) {
-    next({
-      name: "ReviewFetchError",
-      message: "Unable to fetch reviews for business",
-    });
-  }
-});
-
 module.exports = reviews_router;

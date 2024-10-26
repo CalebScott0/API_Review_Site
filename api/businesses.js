@@ -1,5 +1,7 @@
 const express = require("express");
-const business_router = express.Router();
+
+const businesses_router = express.Router();
+
 const {
   getBusinessesFromLocation,
   getBusinessesByCategory,
@@ -9,18 +11,27 @@ const {
   getPhotosForBusiness,
   getCityStateFromBusinesses,
 } = require("../db/businesses");
+
 const { getCategoriesForBusiness } = require("../db/categories");
+
 const { getReviewsForBusiness } = require("../db/reviews");
+
 const { roundHalf } = require("../db/utils");
-const fetch = require("node-fetch");
+
+const generateSignedUrl = require("./__utils__/business_utils");
+
+const fetch = ruire("node-fetch");
+
 require("dotenv").config();
 
 // GET api/businesses/locations?query="" - returns unique combinations of city and state from db
-business_router.get("/locations", async (req, res, next) => {
+businesses_router.get("/locations", async (req, res, next) => {
   try {
     const { location } = req.query;
+
     // matches with Ilike sql query
     let locations = await getCityStateFromBusinesses({ location });
+
     // remove big int count
     locations = locations.map(({ city, state }) => ({
       city,
@@ -38,16 +49,21 @@ business_router.get("/locations", async (req, res, next) => {
 // function can take latitude, longitude, and a radius
 // has a default in db query
 // GET api/businesses/nearby?city=""&state=""limit={&offset={}
-// business_router.get("/nearby", async (req, res, next) => {
+// businesses_router.get("/nearby", async (req, res, next) => {
 //   try {
 //     // get city, state from req query and use location iq api
 //     const { city, state, limit, offset } = req.query;
+
 //     // make call to location iq api with req query city and state, returns 1
 //     const url = `https://us1.locationiq.com/v1/search/structured?city=${city}&state=${state}&format=json&limit=1&key=${process.env.LOCATION_API_KEY}`;
+
 //     const options = { method: "GET", headers: { accept: "application/json" } };
+
 //     // use node fetch to call location iq api
 //     const location_response = await fetch(url, options);
+
 //     const json = await location_response.json();
+
 //     // pass longitude and latitude from location iq to get all businesses from location function
 //     // default radius parameter of 10miles converted to kilometers
 //     const fetch_businesses = await getBusinessesFromLocation({
@@ -66,18 +82,22 @@ business_router.get("/locations", async (req, res, next) => {
 //           getHoursForBusiness(business.id),
 //           getCategoriesForBusiness(business.id),
 //         ]);
+
 //         return {
 //           ...business,
 //           hours: business_hours,
 //           categories,
 //           recent_review: review[0],
 //         };
+
 //       })
 //     );
 
 //     res.send({ businesses });
+
 //   } catch ({ name, message }) {
 //     next({ name, message });
+
 //   }
 // });
 
@@ -86,9 +106,11 @@ business_router.get("/locations", async (req, res, next) => {
 // from location
 
 // GET /api/businesses/categories/:category_id?city=""&state=""&limit={}&offset={}
-business_router.get("/categories/:category_id", async (req, res, next) => {
+businesses_router.get("/categories/:category_id", async (req, res, next) => {
   const { category_id } = req.params;
+
   const { city, state, limit, offset } = req.query;
+
   // if no location provided. i.e general category search
   if (!city && !state) {
     try {
@@ -98,6 +120,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
         limit: +limit,
         offset: +offset,
       });
+
       const businesses = await Promise.all(
         // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories for business
@@ -119,6 +142,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           };
         })
       );
+
       res.send({ businesses });
     } catch (error) {
       next({
@@ -131,13 +155,17 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
     try {
       // make call to location iq api with req query's city and state, returns 1
       const url = `https://us1.locationiq.com/v1/search/structured?city=${city}&state=${state}&format=json&limit=1&key=${process.env.LOCATION_API_KEY}`;
+
       const options = {
         method: "GET",
         headers: { accept: "application/json" },
       };
+
       // use node fetch to call location iq api
       const location_response = await fetch(url, options);
+
       const json = await location_response.json();
+
       // pass longitude and latitude from location iq to get list of businesses ordered by
       // distance from target coordinates
       const fetch_businesses = await getBusinessesByCategoryFromLocation({
@@ -182,15 +210,73 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
   }
 });
 
+// GET api/businesses/:business_id/reviews?limit={}&offset={}
+businesses_router.get("/:business_id/reviews", async (req, res, next) => {
+  const { business_id } = req.params;
+
+  const { limit, offset } = req.query;
+
+  try {
+    const reviews = await getReviewsForBusiness({
+      business_id,
+      // parse to int as they will be string from req
+      limit: +limit,
+      offset: +offset,
+    });
+
+    res.send({ reviews });
+  } catch (error) {
+    next({
+      name: "ReviewFetchError",
+      message: "Unable to fetch reviews for business",
+    });
+  }
+});
+
+// GET api/businesses/:business_id/photos
+businesses_router.get("/:business_id/photos", async (req, res, next) => {
+  const { business_id } = req.params;
+
+  try {
+    let photos = await getPhotosForBusiness(business_id);
+
+    // map photos with signed url from aws
+    photos = await Promise.all(
+      photos.map(async (photo) => {
+        // destructure fields of photo
+        const { id, caption, label } = photo;
+
+        // generate signed url with key - id
+        const signed_url = await generateSignedUrl(id);
+
+        return {
+          signed_url,
+          caption,
+          label,
+        };
+      })
+    );
+
+    res.send({ photos });
+  } catch (error) {
+    next({
+      name: "PhotoFetchError",
+      message: "Unable to fetch photos for business",
+    });
+  }
+});
+
 // GET /api/businesses/:business_id
-business_router.get("/:business_id", async (req, res, next) => {
+businesses_router.get("/:business_id", async (req, res, next) => {
   try {
     const { business_id } = req.params;
+
     let [business, hours, categories] = await Promise.all([
       getBusinessById(business_id),
       getHoursForBusiness(business_id),
       getCategoriesForBusiness(business_id),
     ]);
+
     if (categories.length) {
       business = {
         ...business[0],
@@ -199,6 +285,7 @@ business_router.get("/:business_id", async (req, res, next) => {
         hours,
         categories,
       };
+
       // throws error in endpoint
     } else {
       throw new Error();
@@ -212,4 +299,4 @@ business_router.get("/:business_id", async (req, res, next) => {
   }
 });
 
-module.exports = business_router;
+module.exports = businesses_router;

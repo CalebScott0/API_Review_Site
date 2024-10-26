@@ -23,7 +23,8 @@ const getBusinessesFromLocation = ({
                           FROM businesses
                           WHERE ST_DWithin(location::geography, ST_SetSRID(ST_MakePoint(${longitude},${latitude}), 4326), ${radius}) 
                           ORDER BY review_count DESC
-                          LIMIT ${limit} OFFSET ${offset};`;
+                          LIMIT ${limit} OFFSET ${offset};
+                          `;
 };
 
 const getBusinessesByCategoryFromLocation = ({
@@ -41,7 +42,8 @@ const getBusinessesByCategoryFromLocation = ({
                           JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
                           ORDER BY distance_from_location ASC
-                          LIMIT ${limit} OFFSET ${offset};`;
+                          LIMIT ${limit} OFFSET ${offset};
+                          `;
 };
 
 // Use this for the filter by highest review count!
@@ -53,7 +55,8 @@ const getBusinessesByCategory = ({ category_id, limit = 10, offset = 0 }) => {
                             JOIN category_businesses cb ON b.id = cb.business_id
                             WHERE cb.category_id = ${category_id}
                             ORDER BY review_count DESC
-                            LIMIT ${limit} OFFSET ${offset};`;
+                            LIMIT ${limit} OFFSET ${offset};
+                            `;
 };
 
 const getHoursForBusiness = (business_id) => {
@@ -71,7 +74,9 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
   // if location includes a state
   if (location?.indexOf(",") > 0) {
     const city = location.slice(0, location.indexOf(","));
+
     const state = location.slice(location.indexOf(",") + 1).trim();
+
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
                             WHERE city ILIKE ${`${city}%`}
                             AND state ILIKE ${`${state}%`}
