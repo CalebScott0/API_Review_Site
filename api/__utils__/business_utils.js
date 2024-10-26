@@ -29,4 +29,4 @@ const generateSignedUrl = async (id) => {
   }
 };
 
-export default generateSignedUrl;
+module.exports = generateSignedUrl;

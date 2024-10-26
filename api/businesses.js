@@ -20,7 +20,7 @@ const { roundHalf } = require("../db/utils");
 
 const generateSignedUrl = require("./__utils__/business_utils");
 
-const fetch = ruire("node-fetch");
+const fetch = require("node-fetch");
 
 require("dotenv").config();
 
