@@ -250,6 +250,7 @@ businesses_router.get("/:business_id/photos", async (req, res, next) => {
         const signed_url = await generateSignedUrl(id);
 
         return {
+          id,
           signed_url,
           caption,
           label,
