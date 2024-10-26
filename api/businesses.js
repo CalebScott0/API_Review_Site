@@ -38,7 +38,9 @@ const generateSignedUrl = async (id) => {
       Key: key,
     });
     //60 second url expiration
-    const signed_url = await getSignedUrl(s3Client, command, { expiresIn: 60 }); // URL expires in 60 seconds
+    const signed_url = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    }); // URL expires in 1 hr
     return signed_url;
   } catch (error) {
     throw error;
@@ -205,7 +207,7 @@ business_router.get("/categories/:category_id", async (req, res, next) => {
           ]);
           // map photos with signed url from aws
           photos = await Promise.all(
-            photos.map(async (photo) => {
+            photos.slice(0, 5).map(async (photo) => {
               // destructure fields of photo
               const { id, caption, label } = photo;
               // generate signed url with key - id
