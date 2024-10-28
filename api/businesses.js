@@ -131,7 +131,6 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
             getCategoriesForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
           ]);
-
           return {
             ...business,
             // round average stars to nearest half before sending response
@@ -178,6 +177,9 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
         latitude: +json[0].lat,
       });
 
+      fetch_businesses.sort((a, b) =>
+        a.distance_from_location > b.distance_from_location ? 1 : -1
+      );
       const businesses = await Promise.all(
         // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories / hours for business
@@ -187,7 +189,6 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
             getCategoriesForBusiness(business.id),
             getReviewsForBusiness({ business_id: business.id }),
           ]);
-
           return {
             ...business,
             // round average stars to nearest half before sending response
