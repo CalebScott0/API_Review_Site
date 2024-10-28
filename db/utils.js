@@ -40,9 +40,9 @@ const roundHalf = (num) => {
 const metersToMiles = (num) => {
   const miles = num / 1609;
   // handling for values within a very small radius
-  if (miles < 0.1) return "0.1 miles";
+  if (miles < 0.1) return 0.1;
 
-  return miles.toFixed(1) + " miles";
+  return +miles.toFixed(1);
 };
 
 module.exports = {
