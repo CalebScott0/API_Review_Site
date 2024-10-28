@@ -16,7 +16,7 @@ const { getCategoriesForBusiness } = require("../db/categories");
 
 const { getReviewsForBusiness } = require("../db/reviews");
 
-const { roundHalf } = require("../db/utils");
+const { metersToMiles, roundHalf } = require("../db/utils");
 
 const generateSignedUrl = require("./__utils__/business_utils");
 
@@ -136,6 +136,8 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
             ...business,
             // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
+            // convert meters to miles for distance from target
+            distance_from_location: metersToMiles(),
             hours,
             categories,
             recent_review: reviews[0],
@@ -190,6 +192,10 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
             ...business,
             // round average stars to nearest half before sending response
             average_stars: roundHalf(business.average_stars),
+            // convert meters to miles for distance from target
+            distance_from_location: metersToMiles(
+              business.distance_from_location
+            ),
             hours,
             categories,
             recent_review: reviews[0],

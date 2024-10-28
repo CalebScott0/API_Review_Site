@@ -37,4 +37,17 @@ const roundHalf = (num) => {
   return Math.round(num * 2) / 2;
 };
 
-module.exports = { averageBusinessStars, averageUserStars, roundHalf };
+const metersToMiles = (num) => {
+  const miles = num / 1609;
+  // handling for values within a very small radius
+  if (miles < 0.1) return "0.1 miles";
+
+  return miles.toFixed(1) + " miles";
+};
+
+module.exports = {
+  averageBusinessStars,
+  averageUserStars,
+  metersToMiles,
+  roundHalf,
+};
