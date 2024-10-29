@@ -19,11 +19,19 @@ function isValidTime(timeStr) {
   const timePattern = /^([0-1]?\d|2[0-3]):[0-5]\d$/; // Matches h:mm and hh:mm formats
   return timePattern.test(timeStr);
 }
+
 function formatTime(timeStr) {
   const [hour, minute] = timeStr.split(":");
   const formattedHour = hour.padStart(2, "0"); // Ensures the hour has at least 2 digits
   return `${formattedHour}:${minute}`;
 }
+
+function convertLocalToUTC(time) {
+  const date = new Date(`1970-01-01T${time}:00Z`);
+
+  return new Date(date.getTime() + date.getTimezoneOffset() * 60000); // adjust by 6 hour offset from Central to UTC
+}
+1;
 let count = 0;
 const records = [];
 async function processCSV() {
@@ -51,8 +59,9 @@ async function processCSV() {
         records.push({
           business_id,
           day_of_week: day,
-          open_time: new Date(`1970-01-01T${open_time}:00Z`),
-          close_time: new Date(`1970-01-01T${close_time}:00Z`),
+          // function converts local to UTC
+          open_time: convertLocalToUTC(open_time),
+          close_time: convertLocalToUTC(close_time),
         });
       }
     });
