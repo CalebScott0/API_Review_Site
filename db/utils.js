@@ -33,10 +33,6 @@ const averageUserStars = (
   );
 };
 
-const roundHalf = (num) => {
-  return Math.round(num * 2) / 2;
-};
-
 const metersToMiles = (num) => {
   const miles = num / 1609;
   // handling for values within a very small radius
@@ -49,5 +45,4 @@ module.exports = {
   averageBusinessStars,
   averageUserStars,
   metersToMiles,
-  roundHalf,
 };
