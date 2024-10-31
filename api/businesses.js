@@ -190,6 +190,11 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
             getReviewsForBusiness({ business_id: business.id }),
           ]);
           return {
+            // return search location coordinates to use as center on map
+            search_location_coordinates: {
+              longitude: +json[0].lon,
+              latitude: +json[0].lat,
+            },
             ...business,
             // round average stars to tenth before sending response
             average_stars: +business.average_stars.toFixed(1),
