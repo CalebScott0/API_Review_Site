@@ -181,8 +181,8 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
           limit: +limit,
           page: +page,
           // offset: +offset,
-          longitude: +json[0].lon,
-          latitude: +json[0].lat,
+          longitude: +json[0]?.lon,
+          latitude: +json[0]?.lat,
         }),
         countBusinessesinCategory({
           category_id,
