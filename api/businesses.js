@@ -3,7 +3,8 @@ const express = require("express");
 const businesses_router = express.Router();
 
 const {
-  getBusinessesFromLocation,
+  countBusinessesinCategory,
+  // getBusinessesFromLocation,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
@@ -109,49 +110,52 @@ businesses_router.get("/locations", async (req, res, next) => {
 businesses_router.get("/categories/:category_id", async (req, res, next) => {
   const { category_id } = req.params;
 
-  const { city, state, limit, offset } = req.query;
+  const { city, state, limit, page } = req.query;
+  // const { city, state, limit, offset } = req.query;
 
-  // if no location provided. i.e general category search
+  // if no location provided
   if (!city && !state) {
-    try {
-      // return ordered by review_count desc
-      const fetch_businesses = await getBusinessesByCategory({
-        category_id,
-        limit: +limit,
-        offset: +offset,
-      });
+    // make this return for now, decide later if you want to handle search with no categories
+    return;
+    // try {
+    //   // return ordered by review_count desc
+    //   const fetch_businesses = await getBusinessesByCategory({
+    //     category_id,
+    //     limit: +limit,
+    //     offset: +offset,
+    //   });
 
-      const businesses = await Promise.all(
-        // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
-        // get categories for business
-        fetch_businesses.map(async (business) => {
-          // let [business_hours, categories] = await Promise.all([
-          let [hours, categories, reviews] = await Promise.all([
-            getHoursForBusiness(business.id),
-            getCategoriesForBusiness(business.id),
-            getReviewsForBusiness({ business_id: business.id }),
-          ]);
-          return {
-            ...business,
-            // round average stars to tenth before sending response
-            average_stars: +business.average_stars.toFixed(1),
-            // convert meters to miles for distance from target
-            distance_from_location: metersToMiles(),
-            hours,
-            categories,
-            recent_review: reviews[0],
-          };
-        })
-      );
+    //   const businesses = await Promise.all(
+    //     // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
+    //     // get categories for business
+    //     fetch_businesses.map(async (business) => {
+    //       // let [business_hours, categories] = await Promise.all([
+    //       let [hours, categories, reviews] = await Promise.all([
+    //         getHoursForBusiness(business.id),
+    //         getCategoriesForBusiness(business.id),
+    //         getReviewsForBusiness({ business_id: business.id }),
+    //       ]);
+    //       return {
+    //         ...business,
+    //         // round average stars to tenth before sending response
+    //         average_stars: +business.average_stars.toFixed(1),
+    //         // convert meters to miles for distance from target
+    //         distance_from_location: metersToMiles(),
+    //         hours,
+    //         categories,
+    //         recent_review: reviews[0],
+    //       };
+    //     })
+    //   );
 
-      res.send({ businesses });
-    } catch (error) {
-      next({
-        name: "BusinessByCategoryFetchError",
-        message:
-          "Unable to find businesses by category, check category id is valid",
-      });
-    }
+    //   res.send({ businesses });
+    // } catch (error) {
+    //   next({
+    //     name: "BusinessByCategoryFetchError",
+    //     message:
+    //       "Unable to find businesses by category, check category id is valid",
+    //   });
+    // }
   } else if (city && state) {
     try {
       // make call to location iq api with req query's city and state, returns 1
@@ -167,19 +171,33 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
 
       const json = await location_response.json();
 
-      // pass longitude and latitude from location iq to get list of businesses ordered by
-      // distance from target coordinates
-      const fetch_businesses = await getBusinessesByCategoryFromLocation({
-        category_id,
-        limit: +limit,
-        offset: +offset,
-        longitude: +json[0].lon,
-        latitude: +json[0].lat,
-      });
+      /* pass longitude and latitude from location iq to get list of businesses ordered by
+       * distance from target coordinates
+       * also grab total count of businesses in category for pagination
+       */
+      const [fetch_businesses, total] = await Promise.all([
+        getBusinessesByCategoryFromLocation({
+          category_id,
+          limit: +limit,
+          page: +page,
+          // offset: +offset,
+          longitude: +json[0].lon,
+          latitude: +json[0].lat,
+        }),
+        countBusinessesinCategory({
+          category_id,
+        }),
+      ]);
 
-      fetch_businesses.sort((a, b) =>
-        a.distance_from_location > b.distance_from_location ? 1 : -1
-      );
+      // convert count businesses to number from bigInt
+      const count_businesses = Number(total[0].count);
+
+      // Uncomment this if not sorted after sql
+
+      // fetch_businesses.sort((a, b) =>
+      //   a.distance_from_location > b.distance_from_location ? 1 : -1
+      // );
+
       const businesses = await Promise.all(
         // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
         // get categories / hours for business
@@ -206,11 +224,11 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
         })
       );
 
+      // in response - send total count of businesses in category, current page, total pages, and list of 10 businesses
       res.send({
-        search_location_coordinates: {
-          longitude: +json[0].lon,
-          latitude: +json[0].lat,
-        },
+        count_businesses,
+        page: +page,
+        pages: Math.ceil(count_businesses / limit),
         businesses,
       });
     } catch ({ name, message }) {
@@ -253,7 +271,7 @@ businesses_router.get("/:business_id/photos", async (req, res, next) => {
   const { business_id } = req.params;
 
   try {
-    let photos = await getPhotosForBusiness(business_id);
+    let photos = await getPhotosForBusiness({ business_id });
 
     // map photos with signed url from aws
     photos = await Promise.all(

@@ -31,7 +31,6 @@ function convertLocalToUTC(time) {
 
   return new Date(date.getTime() + date.getTimezoneOffset() * 60000); // adjust by 6 hour offset from Central to UTC
 }
-1;
 let count = 0;
 const records = [];
 async function processCSV() {

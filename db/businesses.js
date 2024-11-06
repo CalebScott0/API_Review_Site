@@ -32,8 +32,11 @@ const getBusinessesByCategoryFromLocation = ({
   longitude,
   latitude,
   limit = 10,
-  offset = 0,
+  page = 0,
+  // offset = 0,
 }) => {
+  const offset = page * limit;
+  console.log("offset", offset);
   // ST_DistanceSphere to calculate distance from target coordinates - return will be in meters
   return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, b.longitude, b.latitude,
                           ST_DistanceSphere(ST_MakePoint(${longitude}, ${latitude}), ST_ASText(location)::geometry)
@@ -42,8 +45,18 @@ const getBusinessesByCategoryFromLocation = ({
                           JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
                           ORDER BY distance_from_location ASC
-                          LIMIT ${limit} OFFSET ${offset};
+                          LIMIT ${limit} OFFSET ${offset}; 
+                          --page * limit to get current offset i.e page 0 = 0 * 10 = offset of 0
+                          -- LIMIT ${limit} OFFSET ${offset};
                           `;
+};
+
+// return total count of businesses in category query for pagination
+const countBusinessesinCategory = ({ category_id }) => {
+  return prisma.$queryRaw`SELECT COUNT(b.id) 
+                          FROM businesses b
+                          JOIN category_businesses cb ON b.id = cb.business_id
+                          WHERE cb.category_id = ${category_id}`;
 };
 
 // Use this for the filter by highest review count!
@@ -64,9 +77,10 @@ const getHoursForBusiness = (business_id) => {
                           WHERE business_id = ${business_id}`;
 };
 
-const getPhotosForBusiness = (business_id) => {
+const getPhotosForBusiness = ({ business_id, limit }) => {
   return prisma.$queryRaw`SELECT id, caption, label FROM business_photos
-                          WHERE business_id = ${business_id}`;
+                          WHERE business_id = ${business_id}
+                          ${limit ? `LIMIT ${limit}` : ""}`;
 };
 
 // return locations filtered with user search query
@@ -114,6 +128,7 @@ const updateBusiness = (id, data) => {
 };
 
 module.exports = {
+  countBusinessesinCategory,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,

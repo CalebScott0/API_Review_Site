@@ -1,0 +1,10 @@
+config:
+  target: "https://api-review-site.onrender.com/api"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+
+scenarios:
+  - flow:
+    - get:
+        url: "/api/businesses/5K2d01yWDxYlm3duiyQ0RQ"
