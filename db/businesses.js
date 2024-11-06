@@ -76,10 +76,10 @@ const getHoursForBusiness = (business_id) => {
                           WHERE business_id = ${business_id}`;
 };
 
-const getPhotosForBusiness = ({ business_id, limit }) => {
+const getPhotosForBusiness = ({ business_id, limit = 10000 }) => {
   return prisma.$queryRaw`SELECT id, caption, label FROM business_photos
                           WHERE business_id = ${business_id}
-                          ${limit ? `LIMIT ${limit}` : ""}`;
+                          LIMIT ${limit}`;
 };
 
 // return locations filtered with user search query
