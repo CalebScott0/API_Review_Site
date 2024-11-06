@@ -36,7 +36,6 @@ const getBusinessesByCategoryFromLocation = ({
   // offset = 0,
 }) => {
   const offset = page * limit;
-  console.log("offset", offset);
   // ST_DistanceSphere to calculate distance from target coordinates - return will be in meters
   return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, b.longitude, b.latitude,
                           ST_DistanceSphere(ST_MakePoint(${longitude}, ${latitude}), ST_ASText(location)::geometry)
