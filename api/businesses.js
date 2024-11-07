@@ -170,6 +170,7 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
       const location_response = await fetch(url, options);
 
       const json = await location_response.json();
+      console.log(json);
 
       /* pass longitude and latitude from location iq to get list of businesses ordered by
        * distance from target coordinates
@@ -269,9 +270,10 @@ businesses_router.get("/:business_id/reviews", async (req, res, next) => {
 // GET api/businesses/:business_id/photos
 businesses_router.get("/:business_id/photos", async (req, res, next) => {
   const { business_id } = req.params;
+  const { limit } = req.query;
+  console.log(limit);
   try {
-    let photos = await getPhotosForBusiness({ business_id });
-    console.log(business_id);
+    let photos = await getPhotosForBusiness({ business_id, limit: +limit });
 
     // map photos with signed url from aws
     photos = await Promise.all(
