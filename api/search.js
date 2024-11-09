@@ -34,10 +34,11 @@ search_router.get("/businesses_and_categories", async (req, res, next) => {
         type: "category",
       };
     });
-
     businesses = businesses.map((business) => {
       return {
         ...business,
+        // bigInt to number - duplicate_count from Count over partition of name match
+        duplicate_count: Number(business.duplicate_count),
         type: "business",
       };
     });

@@ -3,11 +3,13 @@ const express = require("express");
 const businesses_router = express.Router();
 
 const {
+  countBusinessesByName,
   countBusinessesinCategory,
   // getBusinessesFromLocation,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
+  getBusinessesByNameFromLocation,
   getHoursForBusiness,
   getPhotosForBusiness,
   getCityStateFromBusinesses,
@@ -186,6 +188,140 @@ businesses_router.get("/categories/:category_id", async (req, res, next) => {
         }),
         countBusinessesinCategory({
           category_id,
+        }),
+      ]);
+
+      // convert count businesses to number from bigInt
+      const count_businesses = Number(total[0].count);
+
+      // Uncomment this if not sorted after sql
+
+      // fetch_businesses.sort((a, b) =>
+      //   a.distance_from_location > b.distance_from_location ? 1 : -1
+      // );
+
+      const businesses = await Promise.all(
+        // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
+        // get categories / hours for business
+        fetch_businesses.map(async (business) => {
+          let [hours, categories, reviews] = await Promise.all([
+            getHoursForBusiness(business.id),
+            getCategoriesForBusiness(business.id),
+            getReviewsForBusiness({ business_id: business.id }),
+          ]);
+          return {
+            // return search location coordinates to use as center on map
+
+            ...business,
+            // round average stars to tenth before sending response
+            average_stars: +business.average_stars.toFixed(1),
+            // convert meters to miles for distance from target
+            distance_from_location: metersToMiles(
+              business.distance_from_location
+            ),
+            hours,
+            categories,
+            recent_review: reviews[0],
+          };
+        })
+      );
+
+      // in response - send total count of businesses in category, current page, total pages, and list of 10 businesses
+      res.send({
+        count_businesses,
+        page: +page,
+        pages: Math.ceil(count_businesses / limit),
+        businesses,
+      });
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
+  } else {
+    // if only one city or state was provided in query
+    next({
+      name: "BusinessByCategoryFetchError",
+      message: "Please provide both city and state for a location search",
+    });
+  }
+});
+
+// GET /api/businesses/name/:business_name
+businesses_router.get("/name/:business_name", async (req, res, next) => {
+  const { business_name } = req.params;
+
+  const { city, state, limit, page } = req.query;
+
+  if (!city && !state) {
+    // make this return for now, decide later if you want to handle search with no categories
+    return;
+    // try {
+    //   // return ordered by review_count desc
+    //   const fetch_businesses = await getBusinessesByCategory({
+    //     category_id,
+    //     limit: +limit,
+    //     offset: +offset,
+    //   });
+
+    //   const businesses = await Promise.all(
+    //     // Get most recent review for business (review db query limits to 1 on default and ordered by created_at)
+    //     // get categories for business
+    //     fetch_businesses.map(async (business) => {
+    //       // let [business_hours, categories] = await Promise.all([
+    //       let [hours, categories, reviews] = await Promise.all([
+    //         getHoursForBusiness(business.id),
+    //         getCategoriesForBusiness(business.id),
+    //         getReviewsForBusiness({ business_id: business.id }),
+    //       ]);
+    //       return {
+    //         ...business,
+    //         // round average stars to tenth before sending response
+    //         average_stars: +business.average_stars.toFixed(1),
+    //         // convert meters to miles for distance from target
+    //         distance_from_location: metersToMiles(),
+    //         hours,
+    //         categories,
+    //         recent_review: reviews[0],
+    //       };
+    //     })
+    //   );
+
+    //   res.send({ businesses });
+    // } catch (error) {
+    //   next({
+    //     name: "BusinessByCategoryFetchError",
+    //     message:
+    //       "Unable to find businesses by category, check category id is valid",
+    //   });
+    // }
+  } else if (city && state) {
+    try {
+      // make call to location iq api with req query's city and state, returns 1
+      const url = `https://us1.locationiq.com/v1/search/structured?city=${city}&state=${state}&format=json&limit=1&key=${process.env.LOCATION_API_KEY}`;
+
+      const options = {
+        method: "GET",
+        headers: { accept: "application/json" },
+      };
+
+      // use node fetch to call location iq api
+      const location_response = await fetch(url, options);
+
+      const json = await location_response.json();
+
+      /* pass longitude and latitude from location iq to get list of businesses ordered by
+       * distance from target coordinates
+       * also grab total count of businesses with name for pagination
+       */
+      const [fetch_businesses, total] = await Promise.all([
+        getBusinessesByNameFromLocation({
+          business_name,
+          limit: +limit,
+          page: +page,
+          longitude: +json[0]?.lon,
+          latitude: +json[0]?.lat,
+        }),
+        countBusinessesByName({
+          business_name,
         }),
       ]);
 

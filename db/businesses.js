@@ -35,6 +35,7 @@ const getBusinessesByCategoryFromLocation = ({
   page = 1,
   // offset = 0,
 }) => {
+  //page - 1* limit to get current offset i.e page 1 = 0 * 10 = offset of 0
   const offset = (page - 1) * limit;
   // ST_DistanceSphere to calculate distance from target coordinates - return will be in meters
   return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, b.longitude, b.latitude,
@@ -44,10 +45,27 @@ const getBusinessesByCategoryFromLocation = ({
                           JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}
                           ORDER BY distance_from_location ASC
-                          LIMIT ${limit} OFFSET ${offset}; 
-                          --page * limit to get current offset i.e page 0 = 0 * 10 = offset of 0
-                          -- LIMIT ${limit} OFFSET ${offset};
-                          `;
+                          LIMIT ${limit} OFFSET ${offset}`;
+};
+
+// get all businesses of a name by location - will be used for showing
+// a listing of multiple businesses with same name (also including special postfixes that are assumed to match base name)
+const getBusinessesByNameFromLocation = ({
+  business_name,
+  longitude,
+  latitude,
+  limit = 10,
+  page = 1,
+}) => {
+  const offset = (page - 1) * limit;
+  // ST_DistanceSphere to calculate distance from target coordinates - return will be in meters
+  return prisma.$queryRaw`SELECT b.id, b."name", b.average_stars, b.review_count, b.address, b.city, b.postal_code, b.state, b.is_open, b.longitude, b.latitude,
+                          ST_DistanceSphere(ST_MakePoint(${longitude}, ${latitude}), ST_ASText(location)::geometry)
+                          AS distance_from_location
+                          FROM businesses b
+                          WHERE unaccent("name") ILIKE ${`${business_name}%`}
+                          ORDER BY distance_from_location ASC
+                          LIMIT ${limit} OFFSET ${offset}; `;
 };
 
 // return total count of businesses in category query for pagination
@@ -56,6 +74,13 @@ const countBusinessesinCategory = ({ category_id }) => {
                           FROM businesses b
                           JOIN category_businesses cb ON b.id = cb.business_id
                           WHERE cb.category_id = ${category_id}`;
+};
+
+// return total count of businesses in name query for pagination
+const countBusinessesByName = ({ business_name }) => {
+  return prisma.$queryRaw`SELECT COUNT(b.id) 
+                          FROM businesses b
+                          WHERE unaccent (name) ILIKE ${`${business_name}%`}`;
 };
 
 // Use this for the filter by highest review count!
@@ -112,18 +137,18 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
 
 // for search, match businesses by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search
-// sort by closest to location if available to better match results
+// sort by closest to location if available to better match results??
 // capable of returning multiple businesses with same name
-const getBusinessesByName = ({ query, limit = 3 }) => {
+const getBusinessesByName = ({ query, limit = 20 }) => {
   if (query.length < 2) return [];
 
-  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
+  return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state,
+                          COUNT(*) OVER (PARTITION BY unaccent("name")) AS duplicate_count -- count of names that match
                           FROM businesses
-                          WHERE unaccent("name") % unaccent(${query})  -- fuzzy matching - handles special characters
-                          OR unaccent("name") ILIKE ${`${query}%`}  -- case-insensitive partial match 
-                          ORDER BY review_count DESC  -- Sorting by review count to prioritize popular businesses                     
-                          `;
-  // LIMIT ${limit}
+                          WHERE unaccent("name") % unaccent(${query})
+                          OR unaccent("name") ILIKE ${`${query}%`}
+                          ORDER BY similarity(unaccent("name"), unaccent(${query})) DESC -- Sorting by similarity
+                          LIMIT ${limit};`;
 };
 
 // from end point, db query will receive a businesses Id as well as an updated average_stars and/or review_count on review functions
@@ -135,11 +160,13 @@ const updateBusiness = (id, data) => {
 };
 
 module.exports = {
+  countBusinessesByName,
   countBusinessesinCategory,
   getBusinessesByCategory,
   getBusinessesByCategoryFromLocation,
   getBusinessById,
   getBusinessesByName,
+  getBusinessesByNameFromLocation,
   getBusinessesFromLocation,
   getCityStateFromBusinesses,
   getHoursForBusiness,
