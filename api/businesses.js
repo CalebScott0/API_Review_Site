@@ -310,13 +310,13 @@ businesses_router.get("/:business_id", async (req, res, next) => {
       getHoursForBusiness(business_id),
       getCategoriesForBusiness(business_id),
     ]);
-
     if (categories.length) {
       business = {
         ...business[0],
         // round average stars to tenth before sending response
         average_stars: +business[0].average_stars.toFixed(1),
         hours,
+        // destructure categories to remove total_popularity
         categories,
       };
 
@@ -325,10 +325,10 @@ businesses_router.get("/:business_id", async (req, res, next) => {
       throw new Error();
     }
     res.send({ business });
-  } catch (error) {
+  } catch ({ name, message }) {
     next({
-      name: "BusinessFetchError",
-      message: "Unable to find Business, check id is valid",
+      name,
+      message,
     });
   }
 });

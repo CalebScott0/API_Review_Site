@@ -90,16 +90,20 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
 
     const state = location.slice(location.indexOf(",") + 1).trim();
 
+    // Query with fuzzy matching using pg_trgm
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
-                            WHERE city ILIKE ${`${city}%`}
-                            AND state ILIKE ${`${state}%`}
+                            WHERE (city % ${city} OR city ILIKE ${`%${city}%`}) 
+                            AND (state % ${state} OR state ILIKE ${`%${state}%`})
+                            -- WHERE city ILIKE ${`${city}%`}
+                            -- AND state ILIKE ${`${state}%`}
                             GROUP BY city, state
                             ORDER BY business_count DESC
                             LIMIT ${limit}`;
   } else {
     // on input that does not yet include a state
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
-                            WHERE city ILIKE ${`${location}%`}
+                            WHERE (city % ${location} OR city ILIKE ${`%${location}%`})
+                            -- WHERE city ILIKE ${`${location}%`}
                             GROUP BY city, state
                             ORDER  BY business_count DESC
                             LIMIT ${limit}`;
@@ -108,14 +112,18 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
 
 // for search, match businesses by start of name - only if user has typed more than 2 letters
 // ILIKE for case insensitive search
+// sort by closest to location if available to better match results
+// capable of returning multiple businesses with same name
 const getBusinessesByName = ({ query, limit = 3 }) => {
   if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state
                           FROM businesses
-                          WHERE "name" ILIKE ${`${query}%`}
-                          ORDER BY review_count DESC
-                          LIMIT ${limit}`;
+                          WHERE unaccent("name") % unaccent(${query})  -- fuzzy matching - handles special characters
+                          OR unaccent("name") ILIKE ${`${query}%`}  -- case-insensitive partial match 
+                          ORDER BY review_count DESC  -- Sorting by review count to prioritize popular businesses                     
+                          `;
+  // LIMIT ${limit}
 };
 
 // from end point, db query will receive a businesses Id as well as an updated average_stars and/or review_count on review functions

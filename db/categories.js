@@ -28,7 +28,7 @@ const getCategoriesByName = ({ query, limit = 5 }) => {
 };
 
 // categories for a specific business
-const getCategoriesForBusiness = async (business_id) => {
+const getCategoriesForBusiness = (business_id) => {
   return prisma.$queryRaw`SELECT c.* FROM categories c
                           JOIN category_businesses cb ON c.id = cb.category_id
                           WHERE cb.business_id = ${business_id}`;
