@@ -119,8 +119,6 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
                             WHERE (city % ${city} OR city ILIKE ${`%${city}%`}) 
                             AND (state % ${state} OR state ILIKE ${`%${state}%`})
-                            -- WHERE city ILIKE ${`${city}%`}
-                            -- AND state ILIKE ${`${state}%`}
                             GROUP BY city, state
                             ORDER BY business_count DESC
                             LIMIT ${limit}`;
@@ -128,7 +126,6 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
     // on input that does not yet include a state
     return prisma.$queryRaw`SELECT DISTINCT city, state, COUNT(id) as business_count FROM businesses
                             WHERE (city % ${location} OR city ILIKE ${`%${location}%`})
-                            -- WHERE city ILIKE ${`${location}%`}
                             GROUP BY city, state
                             ORDER  BY business_count DESC
                             LIMIT ${limit}`;
