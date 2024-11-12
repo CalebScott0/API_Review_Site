@@ -33,8 +33,8 @@ const BATCH_SIZE = 10000;
     await Promise.all(update_batch);
 
     console.log(
-      `Updated users # ${i} / ${users_with_friends.length} - ${(
-        (i / users_with_friends.length) *
+      `Updated users # ${i + BATCH_SIZE} / ${users_with_friends.length} - ${(
+        ((i + BATCH_SIZE) / users_with_friends.length) *
         100
       ).toFixed(2)}%...`
     );
