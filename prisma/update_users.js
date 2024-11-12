@@ -40,8 +40,6 @@ const BATCH_SIZE = 10000;
     );
   }
 
-  return;
-
   const users = await prisma.users.findMany({
     select: {
       id: true,
