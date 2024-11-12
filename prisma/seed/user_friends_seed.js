@@ -7,8 +7,24 @@ const prisma = new PrismaClient({
 });
 let friends_array = [];
 let count = 0;
+
+const fetchAllUsers = async () => {
+  const users = await prisma.users.findMany({
+    select: {
+      id: true,
+    },
+  });
+  // return a set of all user ids in db
+  return new Set(users.map((user) => user.id));
+};
 //
 async function processCSV() {
+  // userId set to check if id exists
+  console.log("creating set of unique user ids");
+  const usersIdSet = await fetchAllUsers();
+
+  console.log(usersIdSet.size + " unique user ids");
+
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
     .createReadStream(
@@ -16,24 +32,17 @@ async function processCSV() {
     )
     .pipe(parse({ from_line: 2 }));
 
+  console.log("parsing csv records");
+
   for await (const record of parser) {
     const user_id = record[0];
     console.log(`${++count} records parsed`);
 
     const user_friends = record[1].split(", ");
 
-    // TRY WITH A MAP?
     for (const friend_id of user_friends) {
-      // if (!set.has(friend_id)) {
-      const friend_exists = await prisma.users.findUnique({
-        where: { id: friend_id },
-      });
-      // }
-
-      if (!friend_exists) {
-        continue;
-        // Skip this friend if they don't exist
-      } else {
+      // if id is in set of all user ids
+      if (usersIdSet.has(friend_id)) {
         // set.add(friend_id);
         friends_array.push({
           user_id,
@@ -42,9 +51,8 @@ async function processCSV() {
       }
     }
     let create_count = 0;
-    const total = friends_array.length;
-    const BATCH_SIZE = 10000;
-    if (friends_array.length === BATCH_SIZE) {
+    const BATCH_SIZE = 100000;
+    if (friends_array.length >= BATCH_SIZE) {
       try {
         await prisma.user_friends
           .createMany({
@@ -52,9 +60,7 @@ async function processCSV() {
             skipDuplicates: true, // To avoid duplicates if the seeding is rerun
           })
           .then(() => (create_count += BATCH_SIZE))
-          .then(() =>
-            console.log(`${create_count} friends created / ${total}`)
-          );
+          .then(() => console.log(`${create_count} friends created`));
       } catch (error) {
         console.error("Unable to create batch:", error);
       }

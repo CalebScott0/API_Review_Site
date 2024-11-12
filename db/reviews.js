@@ -29,7 +29,8 @@ const getReviewById = (id) => {
 };
 
 // default limit 1 to return most recent
-const getReviewsForBusiness = ({ business_id, limit = 1, offset = 0 }) => {
+const getReviewsForBusiness = ({ business_id, limit = 1, page = 1 }) => {
+  const offset = (page - 1) * limit;
   return prisma.$queryRaw`SELECT r.id, u.first_name, u.last_name, r.author_id,
                           r.business_id, r.stars, r.review_text,
                           r.useful, r.funny, r.cool, r.created_at, r.updated_at

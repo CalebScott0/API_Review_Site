@@ -136,7 +136,7 @@ const getCityStateFromBusinesses = ({ location, limit = 5 }) => {
 // ILIKE for case insensitive search
 // sort by closest to location if available to better match results??
 // capable of returning multiple businesses with same name
-const getBusinessesByName = ({ query, limit = 20 }) => {
+const getBusinessesByName = ({ query, limit = 3 }) => {
   if (query.length < 2) return [];
 
   return prisma.$queryRaw`SELECT id, "name", average_stars, review_count, address, city, state,

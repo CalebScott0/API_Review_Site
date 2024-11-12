@@ -383,17 +383,27 @@ businesses_router.get("/name/:business_name", async (req, res, next) => {
 businesses_router.get("/:business_id/reviews", async (req, res, next) => {
   const { business_id } = req.params;
 
-  const { limit, offset } = req.query;
+  const { limit, page } = req.query;
 
   try {
-    const reviews = await getReviewsForBusiness({
-      business_id,
-      // parse to int as they will be string from req
-      limit: +limit,
-      offset: +offset,
-    });
+    // grab reivews and total reviewCount from business for pagination
+    const [reviews, business] = await Promise.all([
+      getReviewsForBusiness({
+        business_id,
+        // parse to int as they will be string from req
+        limit: +limit,
+        page: +page,
+      }),
+      getBusinessById(business_id),
+    ]);
+    const review_count = business[0].review_count;
 
-    res.send({ reviews });
+    res.send({
+      review_count,
+      page: +page,
+      pages: Math.ceil(review_count / limit),
+      reviews,
+    });
   } catch (error) {
     next({
       name: "ReviewFetchError",
