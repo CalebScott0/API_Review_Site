@@ -4,12 +4,50 @@ const prisma = new PrismaClient({
   log: ["info"],
 });
 
+const BATCH_SIZE = 10000;
 (async function () {
+  // gorup by user_id in user friends table and count all occurrences to find total friends for each user
+  const users_with_friends = await prisma.user_friends.groupBy({
+    by: ["user_id"],
+    _count: {
+      _all: true,
+    },
+  });
+  for (let i = 0; i < users_with_friends.length; i += BATCH_SIZE) {
+    const update_batch = users_with_friends
+      .slice(i, i + BATCH_SIZE)
+      //  create array of promises
+      .map(
+        (user) =>
+          prisma.$queryRaw`UPDATE users SET friend_count = ${user._count._all}
+                          WHERE id = ${user.user_id}`
+        // prisma.users.update({
+        //   where: {
+        //     id: user.user_id,
+        //   },
+        //   data: {
+        //     friend_count: user._count._all,
+        //   },
+        // })
+      );
+    await Promise.all(update_batch);
+
+    console.log(
+      `Updated users # ${i} / ${users_with_friends.length} - ${(
+        (i / users_with_friends.length) *
+        100
+      ).toFixed(2)}%...`
+    );
+  }
+
+  return;
+
   const users = await prisma.users.findMany({
     select: {
       id: true,
     },
   });
+
   console.log(
     `Updating ${users.length} users with review count and average stars...`
   );
@@ -23,8 +61,6 @@ const prisma = new PrismaClient({
       stars: true, // Count the total number of reviews
     },
   });
-
-  const BATCH_SIZE = 100;
 
   for (let i = 0; i < user_stats.length; i += BATCH_SIZE) {
     // create array of update promises
