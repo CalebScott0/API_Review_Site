@@ -21,14 +21,6 @@ const BATCH_SIZE = 10000;
         (user) =>
           prisma.$queryRaw`UPDATE users SET friend_count = ${user._count._all}
                           WHERE id = ${user.user_id}`
-        // prisma.users.update({
-        //   where: {
-        //     id: user.user_id,
-        //   },
-        //   data: {
-        //     friend_count: user._count._all,
-        //   },
-        // })
       );
     await Promise.all(update_batch);
 
@@ -39,7 +31,7 @@ const BATCH_SIZE = 10000;
       ).toFixed(2)}%...`
     );
   }
-
+  return;
   const users = await prisma.users.findMany({
     select: {
       id: true,

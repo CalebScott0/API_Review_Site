@@ -54,6 +54,7 @@ async function processCSV() {
   for await (const record of parser) {
     complimentsArr.push(record);
   }
+  console.log("mapping user records");
   // flatMap to return one array instead of array of nested arrays
   records = complimentsArr.flatMap((user) => {
     //user_id is the first index of each nested user array - rest of the indexes are counts of compliments
@@ -72,7 +73,6 @@ async function processCSV() {
   });
   // each nested array represents 1 user and their
   // received compliments
-
   const create_batch = [];
   console.log("Creating records...");
   for (let i = 0; i < records.length; i++) {
