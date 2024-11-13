@@ -1,4 +1,7 @@
-const { getCategoriesByName } = require("../db/categories");
+const {
+  getCategoriesByName,
+  getCategoriesForBusiness,
+} = require("../db/categories");
 
 const {
   getBusinessesByName,
@@ -19,6 +22,7 @@ search_router.get("/businesses_and_categories", async (req, res, next) => {
       getCategoriesByName({ query }),
       getBusinessesByName({ query }),
     ]);
+
     if (!categories.length && !businesses.length) {
       return res
         .status(400)
@@ -34,12 +38,13 @@ search_router.get("/businesses_and_categories", async (req, res, next) => {
         type: "category",
       };
     });
-    businesses = businesses.map((business) => {
+    businesses = businesses.map(async (business) => {
       return {
         ...business,
         // bigInt to number - duplicate_count from Count over partition of name match
         duplicate_count: Number(business.duplicate_count),
         type: "business",
+        categories: await getCategoriesForBusiness(business.id),
       };
     });
 
