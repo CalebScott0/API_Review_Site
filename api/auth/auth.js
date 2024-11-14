@@ -13,13 +13,17 @@ auth_router.post(
   checkUserExists,
   async (req, res, next) => {
     try {
-      const { password } = req.body;
-      console.log(req.body);
+      const { firstName, lastName, email, password } = req.body;
       //   hash password
       const HASH_PASS = await bcrypt.hash(password, +process.env.SALT || 7);
 
       //   create user with hashed password
-      const user = await createUser({ ...req.body, password: HASH_PASS });
+      const user = await createUser({
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password: HASH_PASS,
+      });
 
       //   create JWT token with user id
       const TOKEN = jwt.sign(
