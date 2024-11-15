@@ -1,15 +1,39 @@
 const { getUserByEmail } = require("../../db/users");
 
-// check user has provided a username and password in body of request
+// check user has provided an email and password in body of request
 const checkUserData = (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, firstName, lastName } = req.body;
+
+  console.log("hi");
   if (!email?.length || !password?.length) {
     return res.status(400).send({
       message: "Please provide an email and password",
     });
+  } else if (
+    // if request is coming from /register route, check for first and last name
+    req.route.path === "/register" &&
+    (!firstName.length || !lastName.length)
+  ) {
+    return res.status(400).send({
+      message: "Please provide a first and last name",
+    });
   }
   next();
 };
+
+// const checkUserDataLogin = (req, res, next) => {
+//   const { email, password, firstName, lastName } = req.body;
+//   if (!email?.length || !password?.length) {
+//     return res.status(400).send({
+//       message: "Please provide an email and password",
+//     });
+//   } else if (!firstName.length || !lastName.length) {
+//     return res.status(400).send({
+//       message: "Please provide a first and last name",
+//     });
+//   }
+//   next();
+// };
 
 const checkUserExists = async (req, res, next) => {
   // check if a user with username from request already exists
