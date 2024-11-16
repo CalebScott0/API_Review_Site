@@ -1,8 +1,8 @@
 const { getReviewById, getUserReviewByBusiness } = require("../../db/reviews");
 
 const checkCreateReviewData = async (req, res, next) => {
-  const { review_text, stars } = req.body;
-  if (!review_text || !stars || stars > 5) {
+  const { reviewText, stars } = req.body;
+  if (!reviewText || !stars || stars > 5) {
     return res.status(400).send({
       message: "Please provide text and a rating (1-5) for review",
     });
@@ -13,15 +13,15 @@ const checkCreateReviewData = async (req, res, next) => {
 
 // checks update review function has text and/or star rating
 const checkUpdateReviewData = async (req, res, next) => {
-  const { review_text, stars } = req.body;
+  const { reviewText, stars } = req.body;
   // error to avoid accidentally removing review_text during update
   // checks if review_text key was provided in req.body obj then if length = 0
-  if (stars && review_text?.length === 0) {
+  if (stars && reviewText?.length === 0) {
     return res.status(400).send({
       message: "Text value cannot be empty for review",
     });
   }
-  if ((!review_text && !stars) || stars > 5) {
+  if ((!reviewText && !stars) || stars > 5) {
     return res.status(400).send({
       message: "Please update the text or rating (1-5) for review",
     });

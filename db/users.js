@@ -20,7 +20,10 @@ const getUserByEmail = (email) => {
                         WHERE email = ${email}`;
 };
 
-const updateUser = (id, data) => {
+const updateUserRating = (id, data) => {
+  // { average_stars: 4, review_count: 1 }
+  return prisma.$queryRaw`UPDATE users SET average_stars=${data.average_stars}, review_count=${data.review_count}
+                          WHERE id = ${id}`;
   return prisma.users.update({
     where: { id },
     data,
@@ -31,5 +34,5 @@ module.exports = {
   createUser,
   getUserByEmail,
   getUserById,
-  updateUser,
+  updateUserRating,
 };

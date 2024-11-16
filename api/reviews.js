@@ -11,9 +11,9 @@ const {
   checkUpdateReviewData,
   checkUserHasReview,
 } = require("./__utils__/review_utils");
-const { getBusinessById, updateBusiness } = require("../db/businesses");
+const { getBusinessById, updateBusinessRating } = require("../db/businesses");
 const { averageBusinessStars, averageUserStars } = require("../db/utils");
-const { getUserById, updateUser } = require("../db/users");
+const { getUserById, updateUserRating } = require("../db/users");
 const { getReviewsForBusiness } = require("../db/reviews");
 
 const reviews_router = express.Router();
@@ -27,7 +27,7 @@ reviews_router.post(
   checkUserHasReview,
   async (req, res, next) => {
     try {
-      const { stars } = req.body;
+      const { reviewText, stars } = req.body;
 
       const author_id = req.user.id;
       const { business_id } = req.params;
@@ -73,23 +73,25 @@ reviews_router.post(
        * is not created
        */
       const [updated_business, updated_user, review] = await Promise.all([
-        updateBusiness(business_id, {
+        updateBusinessRating(business_id, {
           average_stars: new_business_average_stars,
           review_count: new_business_review_count,
         }),
-        updateUser(author_id, {
+        updateUserRating(author_id, {
           average_stars: new_user_average_stars,
           review_count: new_user_review_count,
         }),
         createReview({
           // req body will have review text and stars for new review
-          ...req.body,
+          review_text: reviewText,
+          stars,
           author_id,
           business_id,
         }),
       ]);
       res.status(201).send({ review });
     } catch (error) {
+      console.log(error);
       next({
         name: "CreateReviewFailed",
         message: "Unable to create review",
@@ -146,10 +148,10 @@ reviews_router.put(
 
         const [updated_business, updated_user, updated_review] =
           await Promise.all([
-            updateBusiness(business_id, {
+            updateBusinessRating(business_id, {
               average_stars: new_business_average_stars,
             }),
-            updateUser(author_id, {
+            updateUserRating(author_id, {
               average_stars: new_user_average_stars,
             }),
             updateReview(review_id, {
@@ -213,11 +215,11 @@ reviews_router.delete(
 
       // DELETE ASSIGNMENT TO VARIABLE AFTER TESTING IT WORKS
       await Promise.all([
-        updateBusiness(business_id, {
+        updateBusinessRating(business_id, {
           review_count: new_business_review_count,
           average_stars: new_business_average_stars,
         }),
-        updateUser(author_id, {
+        updateUserRating(author_id, {
           review_count: new_user_review_count,
           average_stars: new_user_average_stars,
         }),
