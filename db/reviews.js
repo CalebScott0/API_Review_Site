@@ -53,8 +53,10 @@ const getReviewsForUser = ({ user_id, limit = 10, offset = 0 }) => {
 };
 
 const getUserReviewByBusiness = (user_id, business_id) => {
-  return prisma.$queryRaw`SELECT r.id, u.first_name, u.last_name, r.author_id,
-                          r.business_id, r.stars, r.review_text,
+  return prisma.$queryRaw`SELECT r.id, u.first_name, u.last_name,
+                          u.review_count AS review_count,
+                          u.friend_count AS friend_count, 
+                          r.author_id, r.business_id, r.stars, r.review_text,
                           r.useful, r.funny, r.cool, r.created_at, r.updated_at
                           FROM reviews r
                           JOIN users u ON r.author_id = u.id
