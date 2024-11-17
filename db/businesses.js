@@ -156,6 +156,15 @@ const updateBusinessRating = (id, data) => {
   });
 };
 
+// return count of star distribution for business
+// count of reviews with each star values 1 - 5
+const getBusinessRatingDistribution = (id) => {
+  return prisma.$queryRaw`SELECT stars, COUNT(stars) FROM reviews
+                          WHERE business_id = ${id}
+                          GROUP BY stars
+                          ORDER BY stars;`;
+};
+
 module.exports = {
   countBusinessesByName,
   countBusinessesinCategory,
@@ -165,6 +174,7 @@ module.exports = {
   getBusinessesByName,
   getBusinessesByNameFromLocation,
   getBusinessesFromLocation,
+  getBusinessRatingDistribution,
   getCityStateFromBusinesses,
   getHoursForBusiness,
   getPhotosForBusiness,

@@ -2,7 +2,7 @@ const express = require("express");
 const users_router = express.Router();
 
 const { getUserById } = require("../db/users");
-const { getReviewsForUser } = require("../db/reviews");
+const { getReviewsForUser, getUserReviewByBusiness } = require("../db/reviews");
 
 // GET /api/users/me - get authenticated user
 users_router.get("/me", async (req, res, next) => {
@@ -52,5 +52,24 @@ users_router.get("/:user_id/reviews", async (req, res, next) => {
     });
   }
 });
+
+// GET /api/users/:user_id/review/business/:business_id
+users_router.get(
+  "/:user_id/review/business/:business_id",
+  async (req, res, next) => {
+    try {
+      const { user_id, business_id } = req.params;
+
+      const user_review_for_business = await getUserReviewByBusiness(
+        user_id,
+        business_id
+      );
+
+      res.send({ user_review_for_business });
+    } catch ({ name, message }) {
+      next({ name, message });
+    }
+  }
+);
 
 module.exports = users_router;

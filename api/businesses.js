@@ -10,6 +10,7 @@ const {
   getBusinessesByCategoryFromLocation,
   getBusinessById,
   getBusinessesByNameFromLocation,
+  getBusinessRatingDistribution,
   getHoursForBusiness,
   getPhotosForBusiness,
   getCityStateFromBusinesses,
@@ -388,6 +389,7 @@ businesses_router.get("/:business_id/reviews", async (req, res, next) => {
   try {
     // grab reivews and total reviewCount from business for pagination
     const [reviews, business] = await Promise.all([
+      // getBusinessRatingDistribution(business_id),
       getReviewsForBusiness({
         business_id,
         // parse to int as they will be string from req
@@ -478,5 +480,14 @@ businesses_router.get("/:business_id", async (req, res, next) => {
     });
   }
 });
+
+// BUSINESS RATING DISTRIBUTION ENDPOINT
+// - START BREAKING UP OTHER FUNCTIONS IN BUSINESS ENDPOINTS
+// - THAT ARE NOT FETCHING BUSINESSES? (LIKE REVIEWS/CATEGORIES?) - after mvp
+
+// convert count values of rating distrubtion to int from bigInt
+// rating_distribution.forEach((item) => {
+//   item.count = Number(item.count);
+// });
 
 module.exports = businesses_router;
