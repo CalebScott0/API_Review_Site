@@ -66,7 +66,6 @@ reviews_router.post(
         stars,
         new_user_review_count
       );
-
       /*
        * promise all will either resolve all or fail
        *  so business and user will not be updated if review
@@ -186,6 +185,8 @@ reviews_router.delete(
     try {
       const { business_id, review_id } = req.params;
       const author_id = req.user.id;
+      console.log("business_id", business_id);
+      console.log("review_id", review_id);
 
       let [business, user, review] = await Promise.all([
         getBusinessById(business_id),
