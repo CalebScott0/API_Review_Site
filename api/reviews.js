@@ -11,7 +11,7 @@ const {
   checkUpdateReviewData,
   checkUserHasReview,
 } = require("./__utils__/review_utils");
-const { getBusinessById, updateBusinessRating } = require("../db/businesses");
+const { getBusinessById, updateBusiness } = require("../db/businesses");
 const { averageBusinessStars, averageUserStars } = require("../db/utils");
 const { getUserById, updateUserRating } = require("../db/users");
 const { getReviewsForBusiness } = require("../db/reviews");
@@ -72,7 +72,7 @@ reviews_router.post(
        * is not created
        */
       const [updated_business, updated_user, review] = await Promise.all([
-        updateBusinessRating(business_id, {
+        updateBusiness(business_id, {
           average_stars: new_business_average_stars,
           review_count: new_business_review_count,
         }),
@@ -147,7 +147,7 @@ reviews_router.put(
 
         const [updated_business, updated_user, updated_review] =
           await Promise.all([
-            updateBusinessRating(business_id, {
+            updateBusiness(business_id, {
               average_stars: new_business_average_stars,
             }),
             updateUserRating(author_id, {
@@ -216,7 +216,7 @@ reviews_router.delete(
 
       // DELETE ASSIGNMENT TO VARIABLE AFTER TESTING IT WORKS
       await Promise.all([
-        updateBusinessRating(business_id, {
+        updateBusiness(business_id, {
           review_count: new_business_review_count,
           average_stars: new_business_average_stars,
         }),

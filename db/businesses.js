@@ -149,7 +149,8 @@ const getBusinessesByName = ({ query, limit = 3 }) => {
 };
 
 // from end point, db query will receive a businesses Id as well as an updated average_stars and/or review_count on review functions
-const updateBusinessRating = (id, data) => {
+const updateBusiness = (id, data) => {
+  console.log(id, data);
   return prisma.businesses.update({
     where: { id },
     data,
@@ -178,5 +179,5 @@ module.exports = {
   getCityStateFromBusinesses,
   getHoursForBusiness,
   getPhotosForBusiness,
-  updateBusinessRating,
+  updateBusiness,
 };
