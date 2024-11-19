@@ -15,6 +15,7 @@ const { getBusinessById, updateBusinessRating } = require("../db/businesses");
 const { averageBusinessStars, averageUserStars } = require("../db/utils");
 const { getUserById, updateUserRating } = require("../db/users");
 const { getReviewsForBusiness } = require("../db/reviews");
+const { ChecksumAlgorithm } = require("@aws-sdk/client-s3");
 
 const reviews_router = express.Router();
 
@@ -28,7 +29,6 @@ reviews_router.post(
   async (req, res, next) => {
     try {
       const { reviewText, stars } = req.body;
-      console.log(reviewText);
 
       const author_id = req.user.id;
       const { business_id } = req.params;
@@ -91,7 +91,6 @@ reviews_router.post(
       ]);
       res.status(201).send({ review });
     } catch (error) {
-      console.log(error);
       next({
         name: "CreateReviewFailed",
         message: "Unable to create review",
@@ -212,10 +211,9 @@ reviews_router.delete(
         stars,
         new_user_review_count
       );
-      console.log(new_user_review_count);
 
       // DELETE ASSIGNMENT TO VARIABLE AFTER TESTING IT WORKS
-      await Promise.all([
+      const [x, userY, z] = await Promise.all([
         updateBusinessRating(business_id, {
           review_count: new_business_review_count,
           average_stars: new_business_average_stars,
@@ -226,9 +224,10 @@ reviews_router.delete(
         }),
         deleteReview(review_id),
       ]);
-
+      console.log(userY);
       res.sendStatus(204);
     } catch (error) {
+      console.log(error);
       next({
         name: "DeleteReviewFailed",
         message: "Unable to delete review",

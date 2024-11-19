@@ -26,7 +26,6 @@ const updateUserRating = (id, data) => {
     return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars}, review_count = ${data.review_count}
                           WHERE id = ${id} RETURNING *`;
   } else {
-    console.log(data.average_stars);
     return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars} 
                             WHERE id = ${id} RETURNING *`;
   }

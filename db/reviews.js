@@ -2,7 +2,6 @@ const prisma = require("./index");
 const uuid = require("uuid");
 
 const createReview = (data) => {
-  console.log(data.review_text);
   return prisma.$queryRaw`INSERT INTO reviews (id, review_text, stars, author_id, business_id)
     VALUES (${uuid.v4()}, ${data.review_text}, ${data.stars}, ${
     data.author_id

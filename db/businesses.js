@@ -154,11 +154,11 @@ const updateBusinessRating = (id, data) => {
     return prisma.$queryRaw`UPDATE businesses
                           SET average_stars = ${data.average_stars},
                           review_count = ${data.review_count}
-                          WHERE id = ${id} RETURNING *;`;
+                          WHERE id = ${id}`;
   } else {
     return prisma.$queryRaw`UPDATE businesses
                           SET average_stars = ${data.average_stars}
-                          WHERE id = ${id} RETURNING *;`;
+                          WHERE id = ${id}`;
   }
 };
 
