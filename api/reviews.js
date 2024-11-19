@@ -213,7 +213,7 @@ reviews_router.delete(
       );
 
       // DELETE ASSIGNMENT TO VARIABLE AFTER TESTING IT WORKS
-      const [x, userY, z] = await Promise.all([
+      await Promise.all([
         updateBusinessRating(business_id, {
           review_count: new_business_review_count,
           average_stars: new_business_average_stars,
@@ -224,7 +224,6 @@ reviews_router.delete(
         }),
         deleteReview(review_id),
       ]);
-      console.log(userY);
       res.sendStatus(204);
     } catch (error) {
       console.log(error);
