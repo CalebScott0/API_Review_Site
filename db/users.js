@@ -24,10 +24,11 @@ const updateUserRating = (id, data) => {
   // optionally includes review count on create or delete review
   if (data.review_count) {
     return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars}, review_count = ${data.review_count}
-                          WHERE id = ${id}`;
+                          WHERE id = ${id} RETURNING *`;
   } else {
+    console.log(data.average_stars);
     return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars} 
-                            WHERE id = ${id}`;
+                            WHERE id = ${id} RETURNING *`;
   }
 };
 
