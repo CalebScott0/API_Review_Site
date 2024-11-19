@@ -111,7 +111,7 @@ reviews_router.put(
     try {
       const { business_id, review_id } = req.params;
       const author_id = req.user.id;
-      let { stars } = req.body;
+      const { stars, reviewText } = req.body;
 
       // only update business and user if a new star rating is given
       if (stars) {
@@ -126,13 +126,13 @@ reviews_router.put(
         //          and new review has 4
         //           you would modify the total stars by - 1
         // this keeps the same equation below with adding stars
-        stars -= review.stars;
+        const updatedStars = stars - review.stars;
 
         // re average business stars with new rating
         const new_business_average_stars = averageBusinessStars(
           business.average_stars,
           business.review_count,
-          stars,
+          updatedStars,
           business.review_count
         );
 
@@ -140,7 +140,7 @@ reviews_router.put(
         const new_user_average_stars = averageUserStars(
           user.average_stars,
           user.review_count,
-          stars,
+          updatedStars,
           user.review_count
         );
 
@@ -153,8 +153,8 @@ reviews_router.put(
               average_stars: new_user_average_stars,
             }),
             updateReview(review_id, {
-              stars: req.body.stars,
-              review_text: req.body.reviewText,
+              stars,
+              review_text: reviewText,
             }),
           ]);
 
@@ -162,7 +162,7 @@ reviews_router.put(
       } else {
         // If no stars in review
         const updated_review = await updateReview(review_id, {
-          review_text: req.body.reviewText,
+          review_text: reviewText,
         });
 
         res.send({ updated_review });
@@ -194,6 +194,7 @@ reviews_router.delete(
       [user, review, business] = [user[0], review[0], business[0]];
 
       const new_business_review_count = business.review_count - 1;
+
       // stars is negative as we are deleting
       const stars = -review.stars;
 
