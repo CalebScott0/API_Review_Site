@@ -150,7 +150,7 @@ const getBusinessesByName = ({ query, limit = 3 }) => {
 
 // from end point, db query will receive a businesses Id as well as an updated average_stars and/or review_count on review functions
 const updateBusinessRating = (id, data) => {
-  if (data.review_count) {
+  if (data.review_count >= 0) {
     return prisma.$queryRaw`UPDATE businesses
                           SET average_stars = ${data.average_stars},
                           review_count = ${data.review_count}
