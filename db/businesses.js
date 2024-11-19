@@ -148,12 +148,18 @@ const getBusinessesByName = ({ query, limit = 3 }) => {
                           LIMIT ${limit};`;
 };
 
-// from end point, db query will receive a businesses Id as well as an updated average_stars and review_count on review functions
+// from end point, db query will receive a businesses Id as well as an updated average_stars and/or review_count on review functions
 const updateBusinessRating = (id, data) => {
-  return prisma.$queryRaw`UPDATE businesses
+  if (data.review_count) {
+    return prisma.$queryRaw`UPDATE businesses
                           SET average_stars = ${data.average_stars},
                           review_count = ${data.review_count}
                           WHERE id = ${id};`;
+  } else {
+    return prisma.$queryRaw`UPDATE businesses
+                          SET average_stars = ${data.average_stars}
+                          WHERE id = ${id};`;
+  }
 };
 
 // return count of star distribution for business

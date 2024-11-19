@@ -1,26 +1,32 @@
 const prisma = require("./index");
+const uuid = require("uuid");
 
 const createReview = (data) => {
-  return prisma.reviews.create({ data });
+  console.log(data.review_text);
+  return prisma.$queryRaw`INSERT INTO reviews (id, review_text, stars, author_id, business_id)
+    VALUES (${uuid.v4()}, ${data.review_text}, ${data.stars}, ${
+    data.author_id
+  }, ${data.business_id}) RETURNING *`;
+  // return prisma.reviews.create({ data });
 };
 
-// will take a review id and a data object
+// will take a review id and a data object - can have just review text or also include a new rating for review
 const updateReview = (id, data) => {
-  {
-    return prisma.reviews.update({
-      where: { id },
-      data: {
-        ...data,
-        updated_at: new Date(),
-      },
-    });
+  // if both review_text and new stars rating
+  if (data.stars) {
+    return prisma.$queryRaw`UPDATE reviews
+                          SET review_text = ${data.review_text}, stars = ${data.stars}
+                          WHERE id = ${id} RETURNING *`;
+  } else {
+    return prisma.$queryRaw`UPDATE reviews
+                            SET review_text = ${data.review_text}
+                            WHERE id = ${id} RETURNING *`;
   }
 };
 
 const deleteReview = (id) => {
-  return prisma.reviews.delete({
-    where: { id },
-  });
+  return prisma.$queryRaw`DELETE FROM reviews
+                          WHERE id = ${id}`;
 };
 
 const getReviewById = (id) => {

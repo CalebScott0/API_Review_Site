@@ -21,13 +21,14 @@ const getUserByEmail = (email) => {
 };
 
 const updateUserRating = (id, data) => {
-  // { average_stars: 4, review_count: 1 }
-  return prisma.$queryRaw`UPDATE users SET average_stars=${data.average_stars}, review_count=${data.review_count}
+  // optionally includes review count on create or delete review
+  if (data.review_count) {
+    return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars}, review_count = ${data.review_count}
                           WHERE id = ${id}`;
-  return prisma.users.update({
-    where: { id },
-    data,
-  });
+  } else {
+    return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars} 
+                            WHERE id = ${id}`;
+  }
 };
 
 module.exports = {

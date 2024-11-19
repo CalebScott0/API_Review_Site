@@ -28,6 +28,7 @@ reviews_router.post(
   async (req, res, next) => {
     try {
       const { reviewText, stars } = req.body;
+      console.log(reviewText);
 
       const author_id = req.user.id;
       const { business_id } = req.params;
@@ -121,7 +122,6 @@ reviews_router.put(
           getReviewById(review_id),
         ]);
         [user, review, business] = [user[0], review[0], business[0]];
-
         // stars to reaverage should equal new star rating - original rating
         // example: if original review had 5 stars
         //          and new review has 4
@@ -154,7 +154,8 @@ reviews_router.put(
               average_stars: new_user_average_stars,
             }),
             updateReview(review_id, {
-              ...req.body,
+              stars: req.body.stars,
+              review_text: req.body.reviewText,
             }),
           ]);
 
@@ -162,7 +163,7 @@ reviews_router.put(
       } else {
         // If no stars in review
         const updated_review = await updateReview(review_id, {
-          ...req.body,
+          review_text: req.body.reviewText,
         });
 
         res.send({ updated_review });
@@ -211,6 +212,7 @@ reviews_router.delete(
         stars,
         new_user_review_count
       );
+      console.log(new_user_review_count);
 
       // DELETE ASSIGNMENT TO VARIABLE AFTER TESTING IT WORKS
       await Promise.all([
