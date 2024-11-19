@@ -226,7 +226,6 @@ reviews_router.delete(
       ]);
       res.sendStatus(204);
     } catch (error) {
-      console.log(error);
       next({
         name: "DeleteReviewFailed",
         message: "Unable to delete review",
