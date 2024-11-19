@@ -23,6 +23,7 @@ const getUserByEmail = (email) => {
 const updateUserRating = (id, data) => {
   // optionally includes review count on create or delete review
   if (data.review_count) {
+    console.log(data);
     return prisma.$queryRaw`UPDATE users SET average_stars = ${data.average_stars}, review_count = ${data.review_count}
                           WHERE id = ${id} RETURNING *`;
   } else {
