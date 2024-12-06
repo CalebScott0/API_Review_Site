@@ -1,19 +1,25 @@
-const { PrismaClient } = require("@prisma/client");
-const fs = require("fs");
-const { parse } = require("csv-parse");
+const { PrismaClient } = require('@prisma/client');
+const fs = require('fs');
+const { parse } = require('csv-parse');
 
 const prisma = new PrismaClient({
-  log: ["info"],
+  log: ['info'],
 });
+
 let complimentsArr = [];
 let records;
 let count = 0;
-//
+
+/*
+ * FIXME:
+ * - MAKE SCRIPT MORE EFFICIENT
+ */
+
 async function processCSV() {
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
     .createReadStream(
-      "/Users/cbs062/Desktop/Review_Site_CSV_Files/user_compliment.csv"
+      '/Users/cbs062/Desktop/Review_Site_CSV_Files/user_compliment.csv'
     )
     .pipe(parse({ from_line: 2 }));
 
@@ -36,17 +42,17 @@ async function processCSV() {
   // count
 
   const ENUMS = [
-    "COOL",
-    "CUTE",
-    "FUNNY",
-    "HOT",
-    "LIST",
-    "MORE",
-    "NOTE",
-    "PHOTOS",
-    "PLAIN",
-    "PROFILE",
-    "WRITER",
+    'COOL',
+    'CUTE',
+    'FUNNY',
+    'HOT',
+    'LIST',
+    'MORE',
+    'NOTE',
+    'PHOTOS',
+    'PLAIN',
+    'PROFILE',
+    'WRITER',
   ];
 
   // const BATCH_SIZE = 1000;
@@ -54,7 +60,7 @@ async function processCSV() {
   for await (const record of parser) {
     complimentsArr.push(record);
   }
-  console.log("mapping user records");
+  console.log('mapping user records');
   // flatMap to return one array instead of array of nested arrays
   records = complimentsArr.flatMap((user) => {
     //user_id is the first index of each nested user array - rest of the indexes are counts of compliments
@@ -74,7 +80,7 @@ async function processCSV() {
   // each nested array represents 1 user and their
   // received compliments
   const create_batch = [];
-  console.log("Creating records...");
+  console.log('Creating records...');
   for (let i = 0; i < records.length; i++) {
     create_batch.push(records[i]);
 
@@ -107,7 +113,7 @@ async function processCSV() {
       console.log(error);
     }
   }
-  console.log("Completed");
+  console.log('Completed');
 }
 
 processCSV()
