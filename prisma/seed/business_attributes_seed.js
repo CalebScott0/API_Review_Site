@@ -17,13 +17,14 @@ const records = [];
 async function processAttributesCSV() {
   // file will not be in  github as it is part of yelp academic dataset
   const parser = fs
-    .createReadStream
-    // '/Users/cbs062/Desktop/Review_Site_CSV_Files/business_attributes.csv'
-    ()
+    .createReadStream(
+      '/Users/cbs062/Desktop/Review_Site_CSV_Files/business_attributes.csv'
+    )
     .pipe(parse({ from_line: 2 }));
 
   for await (const record of parser) {
     console.log(record);
+    break;
   }
 }
 
