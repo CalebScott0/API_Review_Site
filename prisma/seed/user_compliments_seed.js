@@ -14,7 +14,8 @@ const prisma = new PrismaClient({
 async function processCSV() {
   let records = [];
   let record_count = 0;
-  const BATCH_SIZE = 1000;
+  // let record_count = 0;
+  const BATCH_SIZE = 200;
   const total = 24000000;
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
@@ -25,11 +26,14 @@ async function processCSV() {
 
   for await (const record of parser) {
     record_count++;
-    // compliments have been cleaned to match db fields
+    // compliments csv has been cleaned to match db fields
     // records are arrays -> need to be objects to insert into prisma
-    const [id, user_id, type, count] = [...record];
 
-    records.push({ id, user_id, type, count: +count });
+    if (record_count > 1762000) {
+      const [id, user_id, type, count] = [...record];
+
+      records.push({ id, user_id, type, count: +count });
+    }
 
     if (records.length === BATCH_SIZE) {
       try {
@@ -38,6 +42,7 @@ async function processCSV() {
           skipDuplicates: true,
         });
 
+        // format numbers to include comma separation on thousands
         const formatted_count = new Intl.NumberFormat().format(record_count);
         const formatted_total = new Intl.NumberFormat().format(total);
 
@@ -47,6 +52,7 @@ async function processCSV() {
             100
           ).toFixed(2)}%`
         );
+        // clear records array
         records.length = 0;
       } catch (error) {
         console.log(error);
