@@ -29,7 +29,8 @@ async function processCSV() {
     // compliments csv has been cleaned to match db fields
     // records are arrays -> need to be objects to insert into prisma
 
-    if (record_count > 1762000) {
+    if (record_count > 2851700) {
+      // destructure db fields from record array
       const [id, user_id, type, count] = [...record];
 
       records.push({ id, user_id, type, count: +count });
