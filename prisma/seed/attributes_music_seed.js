@@ -11,36 +11,36 @@ const records = [];
 async function processCSV() {
   // file will not be in  github as it is part of yelp academic dataset
   const parser = fs
-    .createReadStream(
-      '/Users/cbs062/Desktop/Review_Site_CSV_Files/best_nights.csv'
-    )
+    .createReadStream('/Users/cbs062/Desktop/Review_Site_CSV_Files/music.csv')
     .pipe(parse({ from_line: 2 }));
 
   for await (const record of parser) {
-    if (record[1].length) {
-      const business_attribute_id = record[0];
-      // record[1] = {day_of_week: bool, ....} -- slice out {} from start/end of value
-      const days_array = record[1].slice(1, record[1].length - 1).split(', ');
+    const business_attribute_id = record[0];
+    // array of json values for hair types for 1 business
+    const music_type_array = record[1]
+      .slice(1, record[1].length - 1)
+      .split(', ');
 
-      days_array.forEach((day) => {
-        // index to slice is colon separating day and bool value
-        const slice_idx = day.indexOf(':');
-        // extract day of week and capitalize to match db enums - slice out quotes
-        const day_of_week = day
-          .slice(1, slice_idx - 1)
-          .trim()
-          .toUpperCase();
-        // extract bool value for each day
-        const value = day.slice(slice_idx + 1).trim();
-        if (day_of_week.length) {
-          records.push({
-            business_attribute_id,
-            day_of_week,
-            value: value === 'True' ? true : false,
-          });
-        }
-      });
-    }
+    // slice out type and value for db records
+    music_type_array.forEach((val) => {
+      const slice_idx = val.indexOf(':');
+
+      let type = val
+        .slice(1, slice_idx - 1)
+        .trim()
+        .toUpperCase();
+      // Adjust for db enum values
+
+      const value = val.slice(slice_idx + 1).trim();
+
+      if (type.length) {
+        records.push({
+          business_attribute_id,
+          type,
+          value: value === 'True' ? true : false,
+        });
+      }
+    });
   }
   const BATCH_SIZE = 100;
   const total = records.length;
@@ -48,7 +48,7 @@ async function processCSV() {
   for (let i = 0; i < total; i += BATCH_SIZE) {
     const create_batch = records.slice(i, i + BATCH_SIZE);
     try {
-      await prisma.attribute_best_nights.createMany({
+      await prisma.attribute_music.createMany({
         data: create_batch,
         skipDuplicates: true,
       });
@@ -65,7 +65,7 @@ async function processCSV() {
       return;
     }
   }
-  console.log('best nights attribute records seeded');
+  console.log('\nmusic attribute records seeded');
 }
 
 processCSV()

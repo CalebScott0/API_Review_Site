@@ -14,7 +14,7 @@ const prisma = new PrismaClient({
 
 let count = 0;
 const records = [];
-async function processAttributesCSV() {
+async function processCSV() {
   // file will not be in  github as it is part of yelp academic dataset
   const parser = fs
     .createReadStream(
@@ -28,7 +28,7 @@ async function processAttributesCSV() {
   }
 }
 
-processAttributesCSV()
+processCSV()
   .then(async () => {
     await prisma.$disconnect();
   })

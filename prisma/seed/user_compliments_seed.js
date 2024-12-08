@@ -6,16 +6,16 @@ const prisma = new PrismaClient({
   log: ['info'],
 });
 
-let complimentsArr = [];
-let records;
-let count = 0;
-
 /*
  * FIXME:
  * - MAKE SCRIPT MORE EFFICIENT
  */
 
 async function processCSV() {
+  let records = [];
+  let record_count = 0;
+  const BATCH_SIZE = 10000;
+  const total = 24000000;
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
     .createReadStream(
@@ -23,97 +23,49 @@ async function processCSV() {
     )
     .pipe(parse({ from_line: 2 }));
 
-  // compliment table has:
-  // id - default uuid
-  // user_id
-  // enum type
-  /* - COOL
-   * - CUTE
-   * - FUNNY
-   * -  HOT
-   * - LIST
-   * - MORE
-   * - NOTE
-   * - PHOTOS
-   * - PLAIN
-   * - PROFILE
-   * - WRITER
-   */
-  // count
-
-  const ENUMS = [
-    'COOL',
-    'CUTE',
-    'FUNNY',
-    'HOT',
-    'LIST',
-    'MORE',
-    'NOTE',
-    'PHOTOS',
-    'PLAIN',
-    'PROFILE',
-    'WRITER',
-  ];
-
-  // const BATCH_SIZE = 1000;
-
   for await (const record of parser) {
-    complimentsArr.push(record);
-  }
-  console.log('mapping user records');
-  // flatMap to return one array instead of array of nested arrays
-  records = complimentsArr.flatMap((user) => {
-    //user_id is the first index of each nested user array - rest of the indexes are counts of compliments
-    const user_id = user[0];
-    //   for each user, return a mapped array of objects
-    //   each object will consist of {
-    //      user_id
-    //      enum type of compliment
-    //      count of the compliment type received
-    // }
-    return ENUMS.map((type, i) => ({
-      user_id,
-      type,
-      count: +user[i + 1],
-    }));
-  });
-  // each nested array represents 1 user and their
-  // received compliments
-  const create_batch = [];
-  console.log('Creating records...');
-  for (let i = 0; i < records.length; i++) {
-    create_batch.push(records[i]);
+    record_count++;
+    // compliments have been cleaned to match db fields
+    // records are arrays -> need to be objects to insert into prisma
+    const [id, user_id, type, count] = [...record];
 
-    if (create_batch.length === BATCH_SIZE) {
+    records.push({ id, user_id, type, count: +count });
+
+    if (records.length === BATCH_SIZE) {
       try {
         await prisma.user_compliments.createMany({
-          data: [...create_batch.splice(0, BATCH_SIZE)],
+          data: records,
           skipDuplicates: true,
         });
 
+        const formatted_count = new Intl.NumberFormat().format(record_count);
+        const formatted_total = new Intl.NumberFormat().format(total);
+
         console.log(
-          `${(count += BATCH_SIZE)} records created / ${records.length}`
+          `\n${formatted_count} records created / ~${formatted_total} records \n${(
+            (record_count / total) *
+            100
+          ).toFixed(2)}%`
         );
+        records.length = 0;
       } catch (error) {
         console.log(error);
       }
     }
   }
-  if (create_batch.length > 0) {
-    try {
-      await prisma.user_compliments.createMany({
-        data: create_batch,
-        skipDuplicates: true,
-      });
+  // extra records after batch creates are done
+  try {
+    await prisma.user_compliments.createMany({
+      data: records,
+      skipDuplicates: true,
+    });
 
-      console.log(
-        `${(count += create_batch.length)} records created / ${records.length}`
-      );
-    } catch (error) {
-      console.log(error);
-    }
+    const formatted_count = new Intl.NumberFormat().format(record_count);
+
+    console.log(`\n${formatted_count} user compliments seeded`);
+  } catch (error) {
+    console.log(error);
   }
-  console.log('Completed');
 }
 
 processCSV()
