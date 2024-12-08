@@ -14,7 +14,7 @@ const prisma = new PrismaClient({
 async function processCSV() {
   let records = [];
   let record_count = 0;
-  const BATCH_SIZE = 10000;
+  const BATCH_SIZE = 1000;
   const total = 24000000;
   // file will not be in github as it is part of yelp academic dataset
   const parser = fs
